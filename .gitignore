@@ -1,16 +1,13 @@
-# Build
+# Visual Studio
+.vs/
 bin/
 obj/
 
-# VS files
-.vs/
+# User files
 *.user
 *.suo
+*.vssscc
 
 # Logs
 logs/
 *.log
-
-# OS
-.DS_Store
-Thumbs.db
