@@ -1,0 +1,154 @@
+﻿@using Microsoft.AspNetCore.Identity
+
+@inject VideoAssetManager.DataAccess.VideoAssetManagerDBContext _VideoAssetManagerDBContext
+
+
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+@{
+
+    VideoAssetManager.DataAccess.Repository.QuickLinksRepository ql = new VideoAssetManager.DataAccess.Repository.QuickLinksRepository(_VideoAssetManagerDBContext);
+    string controllerName = string.Empty;
+    string action = string.Empty;
+    int ProgramId = 0;
+    if (@ViewContext.RouteData.Values["controller"] != null)
+    {
+        controllerName = @ViewContext.RouteData.Values["controller"].ToString();
+    }
+    if (@ViewContext.RouteData.Values["Action"] != null)
+    {
+        action = @ViewContext.RouteData.Values["Action"].ToString();
+    }
+    if (TempData.Peek("ProgramId") != null)
+    {
+        ProgramId = Convert.ToInt32(TempData.Peek("ProgramId"));
+    }
+    var QuickLink = ql.GetQuickLink();
+    ql.GetQuicklinkIds();
+    ql.SetTabLinks();
+    //var RoleName= ql.GetUserRoleName();
+    var RoleName = "";
+    if (string.IsNullOrEmpty(VideoAssetManager.CommonUtils.RekhtaUtility.RoleName))
+        RoleName = "Admin";
+    else
+        RoleName = VideoAssetManager.CommonUtils.RekhtaUtility.RoleName;
+
+
+    VideoAssetManager.CommonUtils.RekhtaUtility.GetProperty.ActionName = action;
+    VideoAssetManager.CommonUtils.RekhtaUtility.GetProperty.ControllerName = controllerName;
+}
+
+<style>
+    .activelink {
+        font: bold;
+        background-color: #fff !important;
+    }
+</style>
+<div style="background-color: #232323 !important;">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <ul class="navbar-nav sidebar sidebar-light accordion" id="accordionSidebar">
+            <li>
+                <a class="sidebar-brand d-flex align-items-center justify-content-center" asp-area="" asp-action="Index" asp-controller="Home">
+                    <div class="sidebar-brand-icon">
+                        <img src="">
+                    </div>                   
+                        <div class="sidebar-brand-text mx-3">REKHTA-AVAM</div>
+                </a>
+            </li>
+            <hr class="sidebar-divider my-0">
+            <li class="nav-item active">
+                <a class="nav-link" asp-area="" asp-action="Index" asp-controller="Home" title="Dashboard">
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            @foreach (var itm in QuickLink)
+            {
+                var collapseBootstrap = "collapseBootstrap" + itm.QuickLinkId;
+                var isShow = "";
+                if (itm.QuickLinkId == VideoAssetManager.CommonUtils.RekhtaUtility.GetProperty.LinkId)
+                {
+                    isShow = "show";
+                }
+                <li class="nav-item">
+                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#@collapseBootstrap" onclick="ReSetTabMenuId()"
+                       aria-expanded="true" aria-controls="@collapseBootstrap">
+                        <i class="far fa-fw fa-window-maximize" title="@itm.QuickLinkName"></i>
+                        <span>@itm.QuickLinkName</span>
+                    </a>
+                    <div style="margin-right:0px;" id="@collapseBootstrap" class="collapse @isShow" aria-labelledby="@collapseBootstrap" data-parent="#accordionSidebar">
+                        @foreach (var item in ql.GetQuickSubLink(itm.QuickLinkId))
+                        {
+                            var isactive = "";
+                            if (item.QuickLinkName == VideoAssetManager.CommonUtils.RekhtaUtility.GetProperty.LinkName)
+                            {
+                                isactive = "activelink";
+                            }                         
+                            <div class="bg-white py-2 collapse-inner rounded @isactive">
+                                <a class="collapse-item" asp-area="admin" asp-action="@item.Action" asp-controller="@item.Area" title="@item.QuickLinkName" onclick="isFromPublishCourse('@itm.QuickLinkId','@item.QuickLinkName','')">@item.QuickLinkName</a>
+                            </div>
+                         
+
+                        }
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+</div>
+
+
+<script>
+
+    function isFromPublishCourse(Id, name, flag) {
+       // alert();
+        $.ajax({
+            url: '/admin/Common/IsFromPublishCourse',
+            type: "GET",
+            data: { Id: Id, Name: name, Flag: flag },
+            crossDomain: true,
+            contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+            dataType: "json",
+            headers: {},
+            crossDomain: true,
+            charset: "UTF-8",
+            cache: false,
+            xhrFields: {
+                withCredentials: true
+            },
+            error: function () {
+                console.log('error');
+            },
+            success: function (data) {
+
+            }
+        });
+    }
+
+    function ReSetTabMenuId() {
+        $.ajax({
+            url: '/admin/Common/ReSetTabMenuId',
+            type: "GET",
+            // data: { Id: Id, Name: name, Flag: flag },
+            crossDomain: true,
+            contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+            dataType: "json",
+            headers: {},
+            crossDomain: true,
+            charset: "UTF-8",
+            cache: false,
+            xhrFields: {
+                withCredentials: true
+            },
+            error: function () {
+                console.log('error');
+            },
+            success: function (data) {
+
+            }
+        });
+    }
+
+</script>

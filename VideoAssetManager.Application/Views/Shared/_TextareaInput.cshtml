@@ -1,0 +1,83 @@
+﻿@model Tuple<string, string, string, bool, int, int>
+
+<div class="form-group">
+    <b>
+        <label for="@Model.Item2">
+            @Model.Item1
+            @if (Model.Item4)
+            {
+                <span class="required"></span>
+            }
+        </label>
+    </b>
+    <textarea class="form-control ckeditor-textarea"
+              name="@Model.Item2"
+              id="@Model.Item2"
+              rows="@Model.Item5"
+              cols="@Model.Item6"
+              data-val="true"
+              data-val-required="This field is required."
+              @(Model.Item4 ? "required" : "")>@Model.Item3</textarea>
+    <span class="text-danger field-validation-valid"
+          style="display: block; white-space: normal; width: 100%; overflow: visible;"
+          data-valmsg-for="@Model.Item2"
+          data-valmsg-replace="true"></span>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        ClassicEditor
+            .create(document.querySelector('#@Model.Item2'), {
+                toolbar: {
+                    items: [
+                        'heading',
+                        'CKFinder',
+                        '|',
+                        'bold',
+                        'italic',
+                        'link',
+                        'bulletedList',
+                        'numberedList',
+                        '|',
+                        'outdent',
+                        'indent',
+                        '|',
+                        'imageUpload',
+                        'blockQuote',
+                        'insertTable',
+                        'mediaEmbed',
+                        'undo',
+                        'redo',
+                        'alignment',
+                        'code',
+                        'codeBlock',
+                        'fontBackgroundColor',
+                        'fontColor',
+                        'fontFamily',
+                        'fontSize',
+                        'htmlEmbed',
+                        'imageInsert',
+                        'sourceEditing'
+                    ]
+                },
+                ckfinder: {
+                    uploadUrl: 'https://ckeditor.com/apps/ckfinder/3.5.0/core/connector/php/connector.php?command=QuickUpload&type=Files&responseType=json'
+                },
+                heading: {
+                    options: [
+                        { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
+                        { model: 'heading1', view: 'h1', title: 'Heading 1', class: 'ck-heading_heading1' },
+                        { model: 'heading2', view: 'h2', title: 'Heading 2', class: 'ck-heading_heading2' },
+                        { model: 'heading3', view: 'h3', title: 'Heading 3', class: 'ck-heading_heading3' }
+                    ]
+                }
+            })
+            .then(editor => {
+                window.editors = window.editors || {};
+                window.editors['@Model.Item2'] = editor;
+            })
+            .catch(err => {
+                // console.error(err.stack);
+            });
+    });
+</script>

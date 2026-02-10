@@ -1,0 +1,165 @@
+﻿@page
+@model RegisterModel
+@using VideoAssetManager.CommonUtils
+@{
+    ViewData["Title"] = "Register";
+    //TempData.Keep("success");
+}
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/4.7.95/css/materialdesignicons.css" rel="stylesheet" />
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+
+<style>
+    .my-custom-scrollbar {
+        position: relative;
+        width: 1600px;
+        height: 1000px;
+        overflow: auto;
+    }
+    .image-text-hide {
+        color: transparent !important;
+    }
+    .toggle-password {
+        cursor: pointer;
+        height: 55px;
+    }
+    .input-group input.form-control {
+        width:68%;
+    }
+</style>
+@if (ViewData["userid"].ToString() != "00000000-0000-0000-0000-000000000000")
+{
+    <div class="PageCaption">
+        <div class="col-md-12 text-left">
+            <span style="font-size:x-large;  font-weight:100">Add User</span>
+
+            <a class="btn btn-primary float-right" asp-area="admin" asp-action="ManageUser" asp-controller="User" title="Manage User">Manage User</a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="PageCaption">
+        <div class="col-md-12 text-left">
+            <span style="font-size:x-large; font-weight:100">Add User</span>
+        </div>
+    </div>
+}
+
+<br />
+<div class="container">
+
+    <div class="row">
+        <div class="col-md-6 offset-md-3 border border-info rounded shadow p-5 bg-light" id="BasicInformation">
+            <section>
+                <form id="registerForm" class="row" asp-route-returnUrl="@Model.ReturnUrl" method="post" enctype="multipart/form-data">
+                    <h4 class="text-center">Create a new account</h4>
+                    <hr />
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-floating py-2 col-12">
+                        <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" />
+                        <label asp-for="Input.Email"></label>
+                        <span asp-validation-for="Input.Email" class="text-danger"></span>
+                    </div>
+                    <div class="form-floating py-2 col-6">
+                        <input asp-for="Input.Name" class="form-control" aria-required="true" />
+                        <label asp-for="Input.Name"></label>
+                        <span asp-validation-for="Input.Name" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-floating py-2 col-6">
+                        <input asp-for="Input.PhoneNumber" class="form-control" aria-required="true" />
+                        <label asp-for="Input.PhoneNumber"></label>
+                        <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+                    </div>
+                    <div class="form-floating py-2 col-6">
+                        <input asp-for="Input.StreetAddress" class="form-control" aria-required="true" />
+                        <label asp-for="Input.StreetAddress"></label>
+                        <span asp-validation-for="Input.StreetAddress" class="text-danger"></span>
+                    </div>
+                    <div class="form-floating py-2 col-6">
+                        <input asp-for="Input.City" class="form-control" aria-required="true" />
+                        <label asp-for="Input.City"></label>
+                        <span asp-validation-for="Input.City" class="text-danger"></span>
+                    </div>
+                    <div class="form-floating py-2 col-6">
+                        <input asp-for="Input.State" class="form-control" aria-required="true" />
+                        <label asp-for="Input.State"></label>
+                        <span asp-validation-for="Input.State" class="text-danger"></span>
+                    </div>
+                    <div class="form-floating py-2 col-6">
+                        <input asp-for="Input.PostalCode" class="form-control" aria-required="true" />
+                        <label asp-for="Input.PostalCode"></label>
+                        <span asp-validation-for="Input.PostalCode" class="text-danger"></span>
+                    </div>
+                    <div class="form-floating py-2 col-6 input-group">
+                        <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" />
+                        <div class="input-group-append toggle-password">
+                            <span class="input-group-text mdi mdi-eye-outline"></span>
+                        </div>
+                        <label asp-for="Input.Password"></label>
+                        <span asp-validation-for="Input.Password" class="text-danger"></span>
+                    </div>
+                    <div class="form-floating py-6 col-6 input-group">
+                        <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" />
+                        <div class="input-group-append toggle-password">
+                            <span class="input-group-text mdi mdi-eye-outline"></span>
+                        </div>
+                        <label asp-for="Input.ConfirmPassword"></label>
+                        <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+                    </div>
+
+                    @if (User.IsInRole(RekhtaUtility.Role_Admin))
+                    {
+                        <div class="form-floating py-2 col-6">
+                            <select asp-for="Input.Role" asp-items="@Model.Input.RoleList" class="form-select" style="cursor:pointer;">
+                                <option disabled selected>-Select Role-</option>
+                            </select>
+
+                        </div>
+                    }
+                    <div class="form-floating py-2 col-6">
+                        <input type="file" id="uploadBox" name="file" class="form-control" onchange="ShowHideText();" />
+                        <label asp-for="Input.Image"></label>
+                    </div>
+                    <button id="registerSubmit" type="submit" class="w-100 btn btn-primary">Register</button>
+                </form>
+            </section>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script type="text/javascript">
+    ShowHideText();
+   
+
+    function ShowHideText() {
+        var fileSize = $("#uploadBox").val();
+        if (fileSize == '' || fileSize == null) {
+            $("#uploadBox").addClass("image-text-hide");
+        }
+        else {
+            $("#uploadBox").removeClass("image-text-hide");
+        }
+    }
+
+    $('.toggle-password').click(function () {
+        $(this).children().toggleClass('mdi-eye-outline mdi-eye-off-outline');
+        let input = $(this).prev();
+        input.attr('type', input.attr('type') === 'password' ? 'text' : 'password');
+    });
+
+     var myCustomScrollbar = document.querySelector('.my-custom-scrollbar');
+    var ps = new PerfectScrollbar(myCustomScrollbar);
+
+    var scrollbarY = myCustomScrollbar.querySelector('.ps__rail-y');
+
+    myCustomScrollbar.onscroll = function () {
+        scrollbarY.style.cssText = `top: ${this.scrollTop}px!important; height: 1000px; right: ${-this.scrollLeft}px`;
+    }
+</script>

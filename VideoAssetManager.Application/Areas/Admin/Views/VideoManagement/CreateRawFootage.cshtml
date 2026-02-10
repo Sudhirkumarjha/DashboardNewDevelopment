@@ -1,0 +1,318 @@
+﻿@model VM_RawFootage
+@inject VideoAssetManager.DataAccess.VideoAssetManagerDBContext _VideoAssetManagerDBContext
+@{
+    VideoAssetManager.DataAccess.Repository.QuickLinksRepository ql = new VideoAssetManager.DataAccess.Repository.QuickLinksRepository(_VideoAssetManagerDBContext);
+
+    ViewData["Title"] = "Add Raw Footage";
+
+}
+
+<style>
+    .ck.ck-content {
+        max-height: 250px;
+    }
+
+    .required::after {
+        content: "*";
+        font-weight: bold;
+        color: red;
+    }
+
+    .checkbox-large {
+        width: 12px;
+        height: 12px;
+        transform: scale(1.5);
+        margin-right: 5px;
+    }
+
+    .select2-container--default .select2-selection--single {
+        height: 38px;
+        padding: 6px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+    }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 36px;
+        }
+</style>
+
+<div class="PageCaption">
+    <div class="col-md-12 text-left">
+        <span style="font-size:x-large; font-weight:100">Add Raw Footage</span>
+        <a class="btn btn-primary float-right" asp-area="admin" asp-action="Index" asp-controller="VideoManagement" title="Manage Content">Manage Raw Footage</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 offset-md-3 border border-info rounded shadow p-5 bg-light" id="BasicInformation">
+            <section>
+                <form method="post" asp-controller="VideoManagement" asp-action="CreateRawFootage" id="account" enctype="multipart/form-data">
+
+                    <input type="hidden" asp-for="Id" id="Id" name="Id" />
+                    <input type="hidden" asp-for="RFId" id="RFId" name="RFId" />
+                    <input type="hidden" asp-for="ProjectCode" id="ProjectCode" name="ProjectCode" />
+                    <input type="hidden" asp-for="HiddenProjectId" id="HiddenProjectId" name="HiddenProjectId" value="@Model.ProjectId" />
+                    <input type="hidden" asp-for="HiddenDateOfEvent" id="HiddenDateOfEvent" name="HiddenDateOfEvent" value="@Model.DateOfEvent" />
+                    <input type="hidden" asp-for="HiddenNoOfCameraUsed" id="HiddenNoOfCameraUsed" name="HiddenNoOfCameraUsed" value="@Model.NoOfCameraUsed" />
+                    <input type="hidden" asp-for="ProjectName" id="ProjectName" name="ProjectName" />
+                    <input type="hidden" asp-for="HiddenCountryId" id="HiddenCountryId" name="HiddenCountryId" value="@Model.CountryId" />
+                    <input type="hidden" id="IsLivePerformanceHidden" name="IsLivePerformance" />
+
+                    <div class="form-group">
+                        <b><label class="required">Project</label></b>
+                        <select asp-for="ProjectId" class="form-control select2" id="ProjectDropdown" data-placeholder="-- Select Project --" asp-items="ViewBag.ProjectList" required>
+                            <option value="">-- Select Project --</option>
+                        </select>
+                        <span asp-validation-for="ProjectId" class="text-danger"></span>
+                    </div>
+
+                    @await Html.PartialAsync("_FormInput", Tuple.Create("File Name", "VideoTitle", Model?.VideoTitle ?? "", true, "text", ""))
+
+                    <div class="form-group">
+                        <b><label class="required">No. Of Camera Used</label></b>
+                        <select asp-for="NoOfCameraUsed" class="form-control" id="NoOfCameraUsed" asp-items="ViewBag.NoOfCameraUsedList" required>
+                            <option value="">-- Select No. Of Camera --</option>
+                        </select>
+                        <span asp-validation-for="NoOfCameraUsed" class="text-danger"></span>
+                    </div>
+
+                    @await Html.PartialAsync("_FormInput", Tuple.Create("Date Of Event", "DateOfEvent", Model.DateOfEvent.ToString("yyyy-MM-dd"), true, "date", ""))
+
+                    <div id="IfLiveRecording" style="display: none;">
+
+                        @await Html.PartialAsync("_FormInput", Tuple.Create("Event", "IsLivePerformance", Model?.IsLivePerformance.ToString() ?? "False", false, "checkbox", ""))
+
+                        @await Html.PartialAsync("_FormInput", Tuple.Create("Venue", "Venue", Model?.Venue ?? "", true, "text", ""))
+
+                        <div class="form-group">
+                            <b><label class="required">Country</label></b>
+                            <select asp-for="CountryId" class="form-control" id="CountryId" asp-items="ViewBag.CountryList">
+                                <option value="">--Select Country--</option>
+                            </select>
+                            <span asp-validation-for="CountryId" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <b><label class="required">City</label></b>
+                            @Html.DropDownListFor(model => model.CityId, (SelectList)ViewBag.CityList, "--Select City--", new { @class = "form-control", id = "CityId" })
+                            <span asp-validation-for="CityId" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <b><label>Stage</label></b>
+                            <select asp-for="StageId" class="form-control select2" name="StageId" id="StageDropdown" data-placeholder="-- Select Stage --">
+                                <option value="">-- Select Stage --</option>
+                                @if (ViewBag.Stages != null)
+                                {
+                                    foreach (SelectListItem item in ViewBag.Stages)
+                                    {
+                                        <option value="@item.Value" selected="@item.Selected">@item.Text</option>
+                                    }
+                                }
+                            </select>
+                            <input type="hidden" asp-for="StageId" id="HiddenStageId" />
+                        </div>
+
+                    </div>
+
+                    @await Html.PartialAsync("_TextareaInput", Tuple.Create("Description", "Description", Model?.Description ?? "", false, 20, 80))
+
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary mb-1">Save</button>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
+}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+
+    $(document).ready(function () {
+
+        $('#StageDropdown').select2({
+            placeholder: "-- Select Stage --",
+            allowClear: true,
+            width: '100%'
+        });
+
+        var id = $("#Id").val();
+
+        if (id && id !== "00000000-0000-0000-0000-000000000000") {
+            $("#IsLivePerformance").prop("disabled", true);
+            $("#ProjectDropdown").prop("disabled", true);
+            $("#DateOfEvent").prop("disabled", true);
+            $("#NoOfCameraUsed").prop("disabled", true);
+
+        }
+
+        $("#IsLivePerformanceHidden").val($("#IsLivePerformance").is(":checked"));
+
+        $("#IsLivePerformance").change(function () {
+            $("#IsLivePerformanceHidden").val($(this).is(":checked"));
+            toggleLiveRecording();
+        });
+
+        // Ensure value is correct before form submission
+        $("form").submit(function () {
+            $("#IsLivePerformanceHidden").val($("#IsLivePerformance").is(":checked"));
+            $("#HiddenProjectId").val($("#ProjectDropdown").val());
+            $("#HiddenDateOfEvent").val($("#DateOfEvent").val());
+            $("#HiddenNoOfCameraUsed").val($("#NoOfCameraUsed").val());
+            $("#HiddenStageId").val($("#StageDropdown").val());
+            $("#HiddenCountryId").val($("#HiddenCountryId").val());
+        });
+
+        $("#ProjectDropdown").change(function () {
+            var selectedText = $("#ProjectDropdown option:selected").text();
+            var match = selectedText.match(/\(([^)]+)\)/);
+            var namePart = selectedText.split(' (')[0];
+
+            if (match) {
+                $("#ProjectCode").val(match[1]);
+                $("#ProjectName").val(namePart);
+            } else {
+                $("#ProjectCode").val("");
+                $("#ProjectName").val("");
+            }
+        });
+
+        // Get stages when project changes
+        $("#ProjectDropdown").change(function () {
+            var projectId = $(this).val();
+            if (projectId) {
+                $.ajax({
+                    url: '@Url.Action("GetStagesByProject", "VideoManagement")',
+                    type: 'GET',
+                    data: { projectId: projectId },
+
+                    success: function (data) {
+                        // Extract project type and stages from the response
+                        var projectType = data.projectType;
+                        var stages = data.stages;
+
+                        // Destroy Select2 and repopulate stages
+                        $('#StageDropdown').select2('destroy');
+                        var options = '<option value="">-- Select Stage --</option>';
+                        $.each(stages, function (index, item) {
+                            options += '<option value="' + item.value + '">' + item.text + '</option>';
+                        });
+                        $("#StageDropdown").html(options);
+
+                        // Re-initialize Select2
+                        $('#StageDropdown').select2({
+                            placeholder: "-- Select Stage --",
+                            allowClear: true,
+                            width: '100%'
+                        });
+
+                        // Show/hide the live recording section based on project type
+                        if (projectType === 1) {
+                            $("#IfLiveRecording").show();
+                            $("#NotLiveRecording").hide();
+                            $('#IsLivePerformance').prop('checked', true).prop('disabled', true);
+                        } else {
+                            $("#IfLiveRecording").hide();
+                            $("#NotLiveRecording").show();
+                            $('#IsLivePerformance').prop('checked', false).prop('disabled', true);
+                        }
+
+                        var hiddenStageId = $("#HiddenStageId").val();
+                        if (hiddenStageId) {
+                            setTimeout(function () {
+                                $('#StageDropdown').val(hiddenStageId).trigger('change');
+                            }, 100);
+                        }
+
+                    }
+                });
+            } else {
+                $('#StageDropdown').select2('destroy');
+                $("#StageDropdown").html('<option value="">-- Select Stage --</option>');
+                $('#StageDropdown').select2({
+                    placeholder: "-- Select Stage --",
+                    allowClear: true
+                });
+            }
+        });
+
+        var isLive = $('#IsLivePerformanceHidden').val().toLowerCase() === 'true';
+        if (isLive) {
+            $("#IfLiveRecording").show();
+            $("#NotLiveRecording").hide();
+            $('#IsLivePerformance').prop('checked', true).prop('disabled', true);
+            var projectId = $("#ProjectDropdown").val();
+            if (projectId) {
+                $("#ProjectDropdown").trigger('change');
+            }
+        } else {
+            $("#IfLiveRecording").hide();
+            $("#NotLiveRecording").show();
+            $('#IsLivePerformance').prop('checked', false).prop('disabled', true);
+        }
+
+        var initialStageId = '@Model.StageId';
+        if (initialStageId) {
+            $('#StageDropdown').val(initialStageId).trigger('change');
+                }
+
+
+        $("#CountryId").change(function () {
+            var countryId = $(this).val();
+            if (countryId) {
+                $.ajax({
+                    url: '@Url.Action("GetCitiesByCountry", "VideoManagement")',
+                    type: 'GET',
+                    data: { countryId: countryId },
+                    success: function (data) {
+                        var $cityDropdown = $("#CityId");
+                        $cityDropdown.empty();
+
+                        // Add default option
+                        $cityDropdown.append($('<option>', {
+                            value: '',
+                            text: '--Select City--'
+                        }));
+
+                        // Append new city options
+                        $.each(data, function (index, item) {
+                            $cityDropdown.append($('<option>', {
+                                value: item.value,
+                                text: item.text
+                            }));
+                        });
+
+                        // Set initial city if editing
+                        var initialCityId = '@Model.CityId';
+                        if (initialCityId && countryId == '@Model.CountryId') {
+                            $cityDropdown.val(initialCityId);
+                        } else {
+                            $cityDropdown.val(''); // keep default selection
+                        }
+                    }
+                });
+            } else {
+                $("#CityId").empty().append($('<option>', {
+                    value: '',
+                    text: '--Select City--'
+                }));
+            }
+       });
+
+        var selectedCountry = $("#CountryId").val();
+        if (selectedCountry) {
+            $("#CountryId").trigger('change');
+        }
+
+
+    });
+
+</script>

@@ -1,0 +1,364 @@
+﻿@model QuicklinkPermission
+@inject VideoAssetManager.DataAccess.VideoAssetManagerDBContext _VideoAssetManagerDBContext
+@{
+    VideoAssetManager.DataAccess.Repository.QuickLinksRepository ql = new VideoAssetManager.DataAccess.Repository.QuickLinksRepository(_VideoAssetManagerDBContext);
+    ViewData["Title"] = "Add Roles";
+    int QuicklinkId = 0;
+    string QuicklinkIds = "";
+    string TabMenuIds = "";
+    string RoleId = "";
+    if (Model != null)
+    {
+        QuicklinkId = Model.QuicklinkId;
+        RoleId = Model.RoleId;
+    }
+    string RoleName = "";
+    if (ViewBag.RoleName != null)
+    {
+        RoleName = ViewBag.RoleName;
+    }
+    if (ViewBag.UserRoleId != null)
+    {
+        RoleId = ViewBag.UserRoleId;
+    }
+    var QuickLink = ql.GetParentQuickLink();
+
+    QuicklinkIds = ViewBag.QuickLinkIds;
+    TabMenuIds = ViewBag.TabMenuIds;
+
+}
+
+<style>
+    .ck.ck-content {
+        max-height: 250px;
+    }
+
+    .required::after {
+        content: "*";
+        font-weight: bold;
+        color: red;
+    }
+
+
+    fieldset {
+        border: none;
+        padding-left: 0;
+        margin-left: 0;
+    }
+
+    #lblcombo {
+        font-weight: bold;
+    }
+
+    #choicelist {
+        border: 1px solid #d6d6d6;
+        width: 100%;
+        background: #fff;
+        border-radius: 2px;
+        display: none;
+        max-height: 530px;
+        overflow-y: auto;
+    }
+
+    #selectedcombo {
+        border: 1px solid #d6d6d6;
+        width: 100%;
+        border-radius: 2px;
+        height: 2.5em;
+        background-color: #fff;
+        position: relative;
+        text-align: center;
+        padding-top: 6px;
+        cursor: pointer;
+    }
+
+    #choicelist > div {
+        padding: 10px 0px 10px 25px;
+    }
+
+    label {
+        font-weight: bold;
+    }
+  
+    .fa-chevron-down {
+        position: absolute;
+        right: 1em;
+        top: 0.9em;
+        color: #a8a8a8;
+        transition: transform .2s ease-out, color .2s ease-out;
+        font-size: 0.85em;
+    }
+
+    .fa-chevron-down--open {
+        transform: rotate(-180deg) translate(0, 2px);
+        color: #404040;
+    }
+
+    #choicelist label {
+        margin: 0;
+    }
+
+    #choicelist > div:hover {
+        background: #f5f5f5;
+    }
+
+    .clsSublink {
+        padding-left: 0px !important;
+    }
+</style>
+<style>
+    .row {
+        margin: 10px;
+    }
+</style>
+
+
+<div class="PageCaption">
+    <div class="col-md-12 text-left">
+
+        <a class="btn btn-primary float-right" asp-area="admin" asp-action="UserRole" asp-controller="User" title="Manage Content">System Role</a>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 offset-md-3" id="BasicInformation">
+
+            <section>
+                <form method="post" asp-controller="User" asp-action="CreateRole" id="account" enctype="multipart/form-data">
+                    <input type="hidden" asp-for="PermissionId" id="Id" name="Id" />
+                    <div class="form-group">
+                        <b><label class="required">Role</label></b>
+                        <input asp-for="RoleName" class="form-control" maxlength="100" value="@RoleName"  required />
+                        <input asp-for="RoleId" type="hidden" class="form-control" maxlength="100" value="@RoleId"  />
+                        <span asp-validation-for="RoleName" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <b><label class="required">Quick Link</label></b>
+                        
+                        <input asp-for="QuicklinkIds" type="hidden" name="QuicklinkIds" id="QuicklinkIds" value="@QuicklinkIds" />
+                         <input asp-for="TabMenuIds" type="hidden" name="TabMenuIds" id="TabMenuIds" value="@TabMenuIds"  />
+                        <b style="margin-left: 4px; color: #fc544b; padding-top: 6px;"><span id="contentalert"></span></b>
+
+                    </div>
+                    <div style=" background: #fff; max-height: 600px; overflow-y: auto;">
+                        <div class="container-fluid">
+
+                            <div class="row">
+                                <div id="tree1"></div>
+                            </div>
+                            <ul class="tree">
+                                @foreach (var itm in QuickLink)
+                                {
+                                    <li>
+                                        @if (ql.GetQuickLinkId(RoleId, itm.QuickLinkId))
+                                        {
+                                            <span>
+                                                <input type="checkbox" name="combo" id="@itm.QuickLinkId" class="@itm.QuickLinkId" value="@itm.QuickLinkId" checked onclick="GetSelectedContent(this,'@itm.QuickLinkName')" />
+                                                <b><label for="@itm.QuickLinkId" aria-label="@itm.QuickLinkName" style="font-size:large;">@itm.QuickLinkName</label></b>
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span>
+                                                <input type="checkbox" name="combo" id="@itm.QuickLinkId" class="@itm.QuickLinkId" value="@itm.QuickLinkId" onclick="GetSelectedContent(this,'@itm.QuickLinkName')" />
+                                                <b><label for="@itm.QuickLinkId" aria-label="@itm.QuickLinkName" style="font-size:large;">@itm.QuickLinkName</label></b>
+                                            </span>
+                                        }
+
+                                        <ul>
+                                            @foreach (var item in ql.GetSubQuickLink(itm.QuickLinkId))
+                                            {
+                                                var tree = "";
+                                                var tablink = ql.GetTabkLink(item.QuickLinkId);
+                                                if (tablink.Count() == 0)
+                                                    tree = "tree-empty";
+                                                else
+                                                    tree = "tree-closed";
+
+                                                <li class="@tree">
+                                                    @if (ql.GetQuickLinkId(RoleId, item.QuickLinkId))
+                                                    {
+                                                        <span class="clsSublink">
+                                                            <input type="checkbox" name="combo" id="@item.QuickLinkId" class="@itm.QuickLinkId" value="@item.QuickLinkId" checked onclick="GetSelectedContent(this,'@item.QuickLinkName')" />
+                                                            <label for="@item.QuickLinkId" aria-label="@item.QuickLinkName">@item.QuickLinkName</label>
+                                                        </span>
+                                                    }
+                                                    else {
+                                                         <input type="checkbox" name="combo" id="@item.QuickLinkId" class="@itm.QuickLinkId" value="@item.QuickLinkId" onclick="GetSelectedContent(this,'@item.QuickLinkName')" />
+                                                            <label for="@item.QuickLinkId" aria-label="@item.QuickLinkName">@item.QuickLinkName</label>
+                                                    }
+
+                                                    <ul>
+                                                        @foreach (var tab in ql.GetTabkLink(item.QuickLinkId))
+                                                        {
+                                                        <li>
+                                                            @if (ql.GetTabLinkId(RoleId, tab.MenuId))
+                                                            {
+                                                                <span class="clsSublink">
+                                                                    <input type="checkbox" name="Tabcombo" id="@tab.TabdivId" class="@itm.QuickLinkId @tab.QuickLinkId" value="@tab.MenuId" checked onclick="GetSelectedContent(this,'@tab.MenuName')" />
+                                                                    <label for="@tab.QuickLinkId" aria-label="@tab.MenuName">@tab.MenuName</label>
+                                                                </span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="clsSublink">
+                                                                    <input type="checkbox" name="Tabcombo" id="@tab.TabdivId" class="@itm.QuickLinkId @tab.QuickLinkId" value="@tab.MenuId" onclick="GetSelectedContent(this,'@tab.MenuName')" />
+                                                                    <label for="@tab.QuickLinkId" aria-label="@tab.MenuName">@tab.MenuName</label>
+                                                                </span>
+                                                            }
+
+                                                        </li>
+                                                        }
+                                                    </ul>
+
+                                                </li>
+                                            }
+                                        </ul>
+                                    </li>
+                                }
+
+                            </ul>
+
+
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="padding-top:10px;">
+                        <button type="submit" class="btn btn-primary mb-1">Save</button>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts{
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
+}
+@*<script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/JqGrid/js/jquery.multiselect.js"></script>
+    <link href="~/JqGrid/css/jqgrid-multiselect.css" rel="stylesheet" />*@
+
+<script src="~/assets/js/jquery-1.11.2.min.js"></script>
+<link href="~/assets/css/jquery.treemenu.css" rel="stylesheet" />
+
+
+
+<style>
+    .row {
+        margin: 10px;
+    }
+</style>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $(".tree").treemenu({ delay: 500 });
+
+        $(".tree-empty").removeClass("tree-closed");
+    });
+</script>
+
+
+<script>
+
+
+        function GetSelectedContent(event, elem) {
+            var TabMenu = "";
+            var QuickLinkName = event.className + ","
+
+            if ('@QuicklinkIds' != '') {
+                if ($('#' + event.id).is(":checked")) {
+                    $("." + event.id).prop("checked", "checked")
+                    $("." + event.id).prop("checked", true)
+                }
+                else {
+                    $("." + event.id).prop("checked", false);
+                    $("." + event.id).removeAttr("checked")
+                }
+              var ss=  $("." + event.id).closest("." + event.id).attr("value");
+                //selectedContent + "," + QuicklinkIds;
+                $("input:checkbox[name=combo]:checked").each(function () {
+                    QuickLinkName += $(this).val() + ",";
+                })
+                $("#QuicklinkIds").val(QuickLinkName);
+                $("input:checkbox[name=Tabcombo]:checked").each(function () {
+                    TabMenu += $(this).val() + ",";
+                })
+                $("#TabMenuIds").val(TabMenu);
+            }
+            else {
+
+
+                if ($('#' + event.id).is(":checked"))
+                {
+                    $("." + event.id).prop("checked", "checked")
+                    $("." + event.id).prop("checked", true)
+                }
+                else {
+                    $("." + event.id).prop("checked", false);
+                    $("." + event.id).removeAttr("checked")
+                }
+                $("input:checkbox[name=combo]:checked").each(function () {
+                    QuickLinkName += $(this).val() + ",";
+                });
+
+                $("#QuicklinkIds").val(QuickLinkName);
+                $("input:checkbox[name=Tabcombo]:checked").each(function () {
+                    TabMenu += $(this).val() + ",";
+                });
+                $("#TabMenuIds").val(TabMenu);
+                
+            }
+
+        }
+    function Resourceclick(event) {
+       
+            $(event).prop("checked", true);
+            var listbutton = $("#selectedcombo");
+            if ($(listbutton).attr("aria-expanded") == "true") {
+                $(listbutton).attr("aria-expanded", "false");
+                $("#choicelist").css("display", "none");
+                $("#selectedcombo .fa-chevron-down").removeclass("fa-chevron-down--open");
+            } else {
+                $(listbutton).attr("aria-expanded", "true");
+                $("#choicelist").css("display", "block");
+                $("#selectedcombo .fa-chevron-down").addclass("fa-chevron-down--open");
+            }
+        }
+
+    $(function () {
+      
+            if ('@QuicklinkIds'!='') {
+                $("#comboList").html('@RoleName' + "");
+                $("#ResourceId").val('@QuicklinkId');
+                $("#choicelist").css("display", "block");
+            }
+            else {
+               
+                $("#choicelist").css("display", "block");
+                $("input[name='combo']").on("change", function () {
+                    var itemCount = $("input[name='combo']:checked").length;
+                    if (itemCount == 0)
+                        $("#comboList").html("");
+                    else if (itemCount == 1)
+                        $("#comboList").html($("label[for='" + $("input[name='combo']:checked")[0].id + "']").text());
+                    else
+                        $("#comboList").html(itemCount + " items selected");
+                });
+
+                $("input[name='combo']").on("keyup", function (e) {
+                    if (e.keyCode == 27) {
+                        Resourceclick();
+                        $("#selectedcombo").focus();
+                    }
+
+                });
+            }
+
+            });
+
+
+    </script>

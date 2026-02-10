@@ -1,0 +1,315 @@
+@model VM_EditedVideos
+@inject VideoAssetManager.DataAccess.VideoAssetManagerDBContext _RekhtaMediaDBContext
+@{
+    ViewData["Title"] = "Create Edited Videos";
+
+    var participants = Model?.Participants ?? new List<VM_ArtistMapping>();
+}
+
+<style>
+    .btn-success, .btn-danger {
+        min-width: 40px;
+        padding: 6px 12px;
+    }
+
+    .input-group-append .input-group-text {
+        background-color: #6c757d !important;
+        border: 1px solid #ced4da;
+        padding: 0.375rem 0.75rem;
+    }
+
+    button.btn-success,
+    .btn-success.btn-success,
+    button.btn-danger {
+        background-color: #757575;
+        border-color: #757575;
+    }
+
+        button.btn-success:hover {
+            background-color: #4bbf73;
+            border-color: #4bbf73;
+        }
+
+        button.btn-danger:hover {
+            background-color: #d9534f;
+            border-color: #d9534f;
+        }
+</style>
+
+<div class="PageCaption">
+    <div class="col-md-12 text-left">
+        <span style="font-size:x-large; font-weight:100">Add Export Videos</span>
+        <a class="btn btn-primary float-right" asp-area="admin" asp-action="EditedVideosIndex" asp-controller="VideoManagement" title="Manage Edited Videos">Manage Export Videos</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 offset-md-3 border border-info rounded shadow p-5 bg-light" id="BasicInformation">
+            <section>
+                <form method="post" asp-controller="VideoManagement" asp-action="CreateEditedVideos" id="editedVideoForm">
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="form-group">
+                        <b><label class="required">Raw Title</label></b>
+                        <select asp-for="RFId" class="form-control select2" id="VideoTitleDropdown" data-placeholder="-- Select Title --" asp-items="ViewBag.RawFootageList" required>
+                            <option value="">-- Select Title --</option>
+                        </select>
+                        <span asp-validation-for="RFId" class="text-danger"></span>
+                    </div>
+
+                    @await Html.PartialAsync("_FormInput", Tuple.Create("File Name", "Title", Model?.Title ?? "", true, "text", ""))
+
+                    <div class="form-group">
+                        <b><label class="required">Resolution</label></b>
+                        <select asp-for="Resolution" class="form-control select2" id="ResolutionsDropdown" data-placeholder="-- Select Resolution --" asp-items="ViewBag.ResolutionList" required>
+                            <option value="">-- Select Resolution --</option>
+                        </select>
+                        <span asp-validation-for="Resolution" class="text-danger"></span>
+                    </div>
+
+                    @await Html.PartialAsync("_FormInput", Tuple.Create("Is For Rekhta App", "IsForRekhtaApp", Model != null ? Model.IsForRekhtaApp.ToString() : "", false, "checkbox", ""))
+
+                    <div class="form-group">
+                        <b><label class="required">Video Type</label></b>
+                        <select asp-for="VideoType" class="form-control" id="VideoTypeDropdown" asp-items="ViewBag.VideoTypeList" required>
+                            <option value="">-- Select Video Type --</option>
+                        </select>
+                        <span asp-validation-for="VideoType" class="text-danger"></span>
+                    </div>
+
+                    @await Html.PartialAsync("_FormInput", Tuple.Create("Export File Name", "VideoFileName", Model?.VideoFileName ?? "", true, "text", ""))
+
+                    <div class="form-group">
+                        <b><label>Thumbnail</label></b>
+                        <input asp-for="Thumbnail" class="form-control" id="Thumbnail" name="Thumbnail" />
+                        <span asp-validation-for="Thumbnail" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <b><label>Language</label></b>
+                        <select asp-for="Language" class="form-control select2"
+                                data-placeholder="-- Select Language --"
+                                asp-items="ViewBag.LanguageList">
+                            <option value="">-- Select Language --</option>
+                        </select>
+                        <span asp-validation-for="Language" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <b><label>Category</label></b>
+                        <select asp-for="CategoryId" class="form-control select2"
+                                data-placeholder="-- Select Category --"
+                                asp-items="ViewBag.CategoryList">
+                            <option value="">-- Select Category --</option>
+                        </select>
+                        <span asp-validation-for="CategoryId" class="text-danger"></span>
+                    </div>
+
+                    @await Html.PartialAsync("_FormInput", Tuple.Create("Duration", "Duration", Model?.Duration ?? "", true, "text", ""))
+
+
+                    @await Html.PartialAsync("_FormInput", Tuple.Create("Size", "Size", Model?.Size.ToString() ?? "", true, "text", "MB"))
+
+
+                    <div class="form-group">
+                        <b><label>Artist Details</label></b>
+                        <table class="table table-bordered" id="dynamicTable">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Gender</th>
+                                    <th>Type</th>
+                                    <th>
+                                        <button type="button" class="btn btn-success btn-sm" onclick="addRow()">+</button>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                                @for (int i = 0; i < participants.Count; i++)
+                                {
+                                    <tr>
+                                        <td>
+                                            <input type="text"
+                                                   name="Participants[@i].ArtistName"
+                                                   class="form-control"
+                                                   value="@participants[i].ArtistName"
+                                                   required />
+                                        </td>
+                                        <td>
+                                            <select name="Participants[@i].Gender" class="form-control" required>
+                                                <option value="M" selected="@(participants[i].Gender == 'M')">Male</option>
+                                                <option value="F" selected="@(participants[i].Gender == 'F')">Female</option>
+                                                <option value="O" selected="@(participants[i].Gender == 'O')">Other</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select name="Participants[@i].Type" class="form-control" required>
+                                                <option value="P" selected="@(participants[i].Type == 'P')">Primary</option>
+                                                <option value="S" selected="@(participants[i].Type == 'S')">Secondary</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">-</button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary mb-1">Save</button>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
+}
+
+    <script>
+        $(document).ready(function () {
+            // Initialize Select2 controls
+            $(".select2").each(function () {
+                $(this).select2({
+                    placeholder: $(this).data("placeholder"),
+                    allowClear: true
+                });
+            });
+
+            // Title sync logic
+            $("#VideoTitleDropdown").change(function () {
+                var selectedText = $("#VideoTitleDropdown option:selected").text();
+                $("#Title").val(selectedText);
+            });
+
+            // Re-index rows on page load (if existing rows have gaps)
+            reindexRows();
+
+            $('#Duration').on('blur input', function () {
+                validateDuration();
+            });
+
+            $('form').submit(function (e) {
+                if (!validateDuration()) {
+                    e.preventDefault();
+                }
+            });
+
+            $('#Size').on('keypress', function (e) {
+                // Allow only digits (0-9)
+                if (e.which < 48 || e.which > 57) {
+                    e.preventDefault();
+                }
+            });
+
+
+            $('#Duration').on('input', function (e) {
+                // Remove all non-digits and existing colons
+                let value = $(this).val().replace(/[^\d]/g, '');
+
+                // Auto-insert colon after 2 digits
+                if (value.length > 2) {
+                    value = value.substring(0, 2) + ':' + value.substring(2);
+                }
+
+                // Limit to 5 characters (HH:MM)
+                if (value.length > 5) {
+                    value = value.substring(0, 5);
+                }
+
+                $(this).val(value);
+            });
+
+            $('#Duration').on('blur', function () {
+                let value = $(this).val();
+                let parts = value.split(':');
+                let hours = parts[0] || '';
+                let minutes = parts[1] || '';
+
+                // Auto-complete formatting
+                if (hours && !minutes) {
+                    minutes = '00'; // Add default minutes
+                }
+
+                // Pad with leading zeros
+                hours = hours.padStart(2, '0');
+                minutes = minutes.padEnd(2, '0').substring(0, 2);
+
+                // Rebuild the value
+                const newValue = `${hours}:${minutes}`;
+                $(this).val(newValue);
+
+                // Validate final format
+                const isValid = /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/.test(newValue);
+                $('#durationFormatError').text(isValid ? '' : 'Invalid time format (HH:MM)');
+            });
+        });
+
+        function addRow() {
+            const currentRowCount = $('#dynamicTable tbody tr').length;
+            const newRow = `
+                        <tr>
+                            <td>
+                                <input type="text" name="Participants[${currentRowCount}].ArtistName" class="form-control" required />
+                            </td>
+                            <td>
+                                <select name="Participants[${currentRowCount}].Gender" class="form-control" required>
+                                    <option value="M">Male</option>
+                                    <option value="F">Female</option>
+                                    <option value="O">Other</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select name="Participants[${currentRowCount}].Type" class="form-control" required>
+                                    <option value="P">Primary</option>
+                                    <option value="S">Secondary</option>
+                                </select>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">-</button>
+                            </td>
+                        </tr>`;
+
+            $('#tableBody').append(newRow);
+            reindexRows(); // Re-index after adding
+        }
+
+        function removeRow(button) {
+            $(button).closest('tr').remove();
+            reindexRows(); // Re-index after removal
+        }
+
+        function reindexRows() {
+            // Reset all row indices to ensure sequential numbering
+            $('#dynamicTable tbody tr').each(function (index) {
+                $(this).find('input, select').each(function () {
+                    const $element = $(this);
+                    const name = $element.attr('name');
+                    if (name) {
+                        // Update the index in the name attribute
+                        const newName = name.replace(/\[\d+\]/g, `[${index}]`);
+                        $element.attr('name', newName);
+                    }
+                });
+            });
+        }
+
+        function validateDuration() {
+            const duration = $('#Duration').val();
+            const regex = /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/; // HH:MM format
+
+            if (!regex.test(duration)) {
+                $('#durationFormatError').text('Please enter valid duration in HH:MM format');
+                return false;
+            }
+            $('#durationFormatError').text('');
+            return true;
+        }
+    </script>

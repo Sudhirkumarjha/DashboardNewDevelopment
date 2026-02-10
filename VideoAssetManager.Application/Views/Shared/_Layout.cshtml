@@ -1,0 +1,175 @@
+﻿@inject VideoAssetManager.DataAccess.VideoAssetManagerDBContext _VideoAssetManagerDBContext
+@{
+
+    VideoAssetManager.DataAccess.Repository.QuickLinksRepository ql = new VideoAssetManager.DataAccess.Repository.QuickLinksRepository(_VideoAssetManagerDBContext);
+    string controllerName = string.Empty;
+    string action = string.Empty;
+    int ProgramId = 0;
+    if (@ViewContext.RouteData.Values["controller"] != null)
+    {
+        controllerName = @ViewContext.RouteData.Values["controller"].ToString();
+    }
+    if (@ViewContext.RouteData.Values["Action"] != null)
+    {
+        action = @ViewContext.RouteData.Values["Action"].ToString();
+    }
+    if (TempData.Peek("ProgramId") != null)
+    {
+        ProgramId = Convert.ToInt32(TempData.Peek("ProgramId"));
+    }
+    var QuickLink = ql.GetQuickLink();
+    bool isNavigationShow = VideoAssetManager.CommonUtils.RekhtaUtility.isNavigationShow(controllerName, action);
+
+    ql.GetQuicklinkIds();
+    ql.SetTabLinks();
+
+    VideoAssetManager.CommonUtils.RekhtaUtility.GetProperty.ActionName = action;
+    VideoAssetManager.CommonUtils.RekhtaUtility.GetProperty.ControllerName = controllerName;
+    
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="~/css/bootswatchTheme.css" />
+    <title>@ViewData["Title"] - Admin</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link href="~/assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="~/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="~/assets/css/ruang-admin.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+   
+
+    <script src="https://cdn.ckeditor.com/ckeditor5/36.0.0/classic/ckeditor.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/css/bootstrap-multiselect.css">
+    <script src="https://ckeditor.com/apps/ckfinder/3.5.0/ckfinder.js"></script>
+
+
+</head>
+<body id="page-top">
+
+    <style>
+        #wrapper #content-wrapper {
+            min-height: 100vh;
+        }
+
+        .currentTab {
+            background-color: #eaecf4;
+        }
+    </style>
+
+    <div id="wrapper">
+        <partial name="_Menu" />
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div class="mainLder">
+                <div class="backDrop" style="display:none;"></div>
+                <div class="loader" style="display:none;">
+                </div>
+            </div>
+            <div id="content">
+                <nav class="navbar navbar-expand navbar-light bg-navbar topbar mb-4 static-top">
+                    <button id="sidebarToggleTop" class="btn btn-link rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item dropdown no-arrow">
+                            <partial name="_LoginPartial" />
+                        </li>
+                    </ul>
+                </nav>
+                @*Border Condation*@
+                <div>
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item dropdown no-arrow">
+                            @if (isNavigationShow)
+                            {
+                                <partial name="_TabViewPartial" />
+                            }
+                        </li>
+                    </ul>
+                </div>
+                <div class="container-fluid" id="container-wrapper">
+                    <partial name="_Notification" />
+                    @RenderBody()
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <footer style="display:none" class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2023 - Admin - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+    <script src="~/assets/js/jquery.treemenu.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <link href="~/JqGrid/css/jquery-ui.css" rel="stylesheet" />
+    <link href="~/JqGrid/css/ui.jqgrid.css" rel="stylesheet" />
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <script src="~/lib/jquery/dist/js/jquery-ui.min.js"></script>
+    <script src="~/lib/jquery/dist/js/trirand/i18n/grid.locale-en.js"></script>
+    <script src="~/lib/jquery/dist/js/trirand/jquery.jqgrid.min.js"></script>
+    <script src="~/autocomplete/ui-1.1.2.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/js/bootstrap-multiselect.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script> Add this link to _Layout page
+
+
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
+
+
+<script>
+   
+    function isFromPublishCourse(Id, name, flag) {
+     
+        $.ajax({
+            url: '/admin/Common/IsFromPublishCourse',
+            type: "GET",
+            data: { Id: Id, Name: name, Flag: flag },
+            crossDomain: true,
+            contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+            dataType: "json",
+            headers: {},
+            crossDomain: true,
+            charset: "UTF-8",
+            cache: false,
+            xhrFields: {
+                withCredentials: true
+            },
+            error: function () {
+                console.log('error');
+            },
+            success: function (data) {
+                
+              //  alert('00');
+
+            }
+        });
+    }
+
+    $("#sidebarToggleTop").on('click', function (e) {
+        $("body").toggleClass("sidebar-toggled");
+        $(".sidebar").toggleClass("toggled");
+        if ($(".sidebar").hasClass("toggled")) {
+            $('.sidebar .collapse').collapse('hide');
+        };
+    });
+
+</script>

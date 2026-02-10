@@ -1,0 +1,88 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup Label="Globals">
+    <SccProjectName>SAK</SccProjectName>
+    <SccProvider>SAK</SccProvider>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccLocalPath>SAK</SccLocalPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Data\RekhtaMediaAdo.cs" />
+    <Compile Remove="Repository\AutomailerDetailsRepository.cs" />
+    <Compile Remove="Repository\AutomailerMasterRepository.cs" />
+    <Compile Remove="Repository\AutomailerParameterMasterRepository.cs" />
+    <Compile Remove="Repository\BulkJERPassRepository.cs" />
+    <Compile Remove="Repository\CertificateDetailsRepository.cs" />
+    <Compile Remove="Repository\ContentEditorRepository.cs" />
+    <Compile Remove="Repository\ContentWriterRepository.cs" />
+    <Compile Remove="Repository\CourseLaunchRepository.cs" />
+    <Compile Remove="Repository\CourseNodeTrackingRepository.cs" />
+    <Compile Remove="Repository\CourseNotificationRepository.cs" />
+    <Compile Remove="Repository\EventTypeMasterRepository.cs" />
+    <Compile Remove="Repository\HighlightsRepository.cs" />
+    <Compile Remove="Repository\HomeScreenDataRepository.cs" />
+    <Compile Remove="Repository\IRepository\IAutomailerDetailsRepository.cs" />
+    <Compile Remove="Repository\IRepository\IAutomailerMasterRepository.cs" />
+    <Compile Remove="Repository\IRepository\IAutomailerParameterMasterRepository.cs" />
+    <Compile Remove="Repository\IRepository\IBulkJERPassRepository.cs" />
+    <Compile Remove="Repository\IRepository\ICertificateDetailsRepository.cs" />
+    <Compile Remove="Repository\IRepository\IContentEditorRepository.cs" />
+    <Compile Remove="Repository\IRepository\IContentWriterRepository.cs" />
+    <Compile Remove="Repository\IRepository\ICourseLaunchRepository.cs" />
+    <Compile Remove="Repository\IRepository\ICourseNodeTrackingRepository.cs" />
+    <Compile Remove="Repository\IRepository\ICourseNotificationRepository.cs" />
+    <Compile Remove="Repository\IRepository\ICoursePresenterRepository.cs" />
+    <Compile Remove="Repository\IRepository\IEventRegistrationRepository.cs" />
+    <Compile Remove="Repository\IRepository\IEventTypeMasterRepository.cs" />
+    <Compile Remove="Repository\IRepository\IFaqMasterRepository.cs" />
+    <Compile Remove="Repository\IRepository\IHighlightsRepository.cs" />
+    <Compile Remove="Repository\IRepository\IHomeScreenDataRepository.cs" />
+    <Compile Remove="Repository\IRepository\IInstructorsMasterRepository.cs" />
+    <Compile Remove="Repository\IRepository\ILearningPlanRepository.cs" />
+    <Compile Remove="Repository\IRepository\INotifyMeRepository.cs" />
+    <Compile Remove="Repository\IRepository\INotifyMeRepository1.cs" />
+    <Compile Remove="Repository\IRepository\IPartnerAndSponserRepository.cs" />
+    <Compile Remove="Repository\IRepository\IProgramRepository.cs" />
+    <Compile Remove="Repository\IRepository\ISiteMapRepository.cs" />
+    <Compile Remove="Repository\IRepository\ISyncPassDataRepository.cs" />
+    <Compile Remove="Repository\IRepository\IUpComingCourseRepository.cs" />
+    <Compile Remove="Repository\IRepository\IUser_BookmarkRepository.cs" />
+    <Compile Remove="Repository\IRepository\IUser_ReportDetailsRepository.cs" />
+    <Compile Remove="Repository\IRepository\IUser_SurfingInfoRepository.cs" />
+    <Compile Remove="Repository\IRepository\IWhatYouWillLearnRepository.cs" />
+    <Compile Remove="Repository\LearningPlanRepository.cs" />
+    <Compile Remove="Repository\ManageCreditsRepository.cs" />
+    <Compile Remove="Repository\NotifyMeRepository.cs" />
+    <Compile Remove="Repository\NotifyMeRepository1.cs" />
+    <Compile Remove="Repository\PartnerAndSponserRepository.cs" />
+    <Compile Remove="Repository\ProgramRepository.cs" />
+    <Compile Remove="Repository\SettingsRepository.cs" />
+    <Compile Remove="Repository\SiteMapRepository.cs" />
+    <Compile Remove="Repository\SyncPassDataRepository.cs" />
+    <Compile Remove="Repository\UpComingCourseRepository.cs" />
+    <Compile Remove="Repository\WhatYouWillLearnRepository.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.32" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.32" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.32" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.32">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VideoAssetManager.CommonUtils\VideoAssetManager.CommonUtils.csproj" />
+    <ProjectReference Include="..\VideoAssetManager.Models\VideoAssetManager.Models.csproj" />
+  </ItemGroup>
+
+</Project>

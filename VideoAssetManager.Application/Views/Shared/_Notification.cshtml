@@ -1,0 +1,34 @@
+﻿@if(TempData["success"] != null)
+{
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script type="text/javascript">
+        toastr.success('@TempData["success"]');
+	</script>
+}
+@if(TempData["error"] != null)
+{
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+     <script type="text/javascript">
+        toastr.error('@TempData["error"]');
+	</script>
+}
+
+<style>
+    .toast-success {
+        background-color: #61b374 !important;
+        color: #fff;
+        margin-top: 140px;
+    }
+    .toast-error {
+        background-color: #c5656e !important; 
+        color: #fff;
+        margin-top: 140px;
+    }
+
+    #toast-container > div{
+        opacity:1;
+    }
+
+</style>

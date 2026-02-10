@@ -1,0 +1,777 @@
+﻿@inject VideoAssetManager.DataAccess.VideoAssetManagerDBContext _VideoAssetManagerDBContext
+@{
+    VideoAssetManager.DataAccess.Repository.QuickLinksRepository ql = new VideoAssetManager.DataAccess.Repository.QuickLinksRepository(_VideoAssetManagerDBContext);
+    string controllerName = string.Empty;
+    string action = string.Empty;
+    //Program
+    if (@ViewContext.RouteData.Values["Action"] != null)
+    {
+        action = @ViewContext.RouteData.Values["Action"].ToString();
+    }
+    if (@ViewContext.RouteData.Values["controller"] != null)
+    {
+        controllerName = @ViewContext.RouteData.Values["controller"].ToString();
+    }
+    var TabMenu = ql.GetTabMenu(controllerName, action);
+    var ClassName = VideoAssetManager.CommonUtils.RekhtaUtility.GetProperty.ClassName;
+    if (string.IsNullOrEmpty(ClassName))
+    {
+        ClassName = "firstTab";
+    }
+}
+
+<style>
+    body {
+        font-family: Arial;
+    }
+
+    .PageCaption {
+        overflow: hidden;
+        border: 0px solid #ccc;
+        max-width: 101%;
+        margin-top: -30px;
+        margin-left: -24px;
+        margin-right: 7px;
+        margin-bottom: 14px;
+    }
+
+    .Pagebutton {
+        margin-top: 18px;
+    }
+
+    /* Style the tab */
+    .tab {
+        overflow: hidden;
+        border: 0px solid #ccc;
+        /*background-color: #f1f1f1;*/
+        width: 100%;
+    }
+
+    .spaceBottom .btn.btn-primary {
+        margin-bottom: 1rem;
+        margin-left: 0.5rem
+    }
+
+    /* Style the buttons inside the tab */
+    .tab button {
+        background-color: inherit;
+        float: left;
+        border: 0px solid #ccc;
+        outline: none;
+        cursor: pointer;
+        padding: 6px 10px;
+        transition: 0.3s;
+        font-size: 14px;
+        border-radius: 12px;
+    }
+
+        /* Change background color of buttons on hover */
+        .tab button:hover {
+            background-color: #ddd;
+        }
+
+        /* Create an active/current tablink class */
+        .tab button.active {
+            background-color: #4283d0;
+            color: #fff;
+        }
+
+    /* Style the tab content */
+    .tabcontent {
+        display: none;
+        padding: 6px 12px;
+        border: 0px solid #ccc;
+        border-top: none;
+    }
+</style>
+
+<div style="margin-right: 72rem; margin-left: 12px; " class="col-md-6">
+    <div class="row">
+        <div class="col-md-12">
+            <button class="clsCaption" id="clsCaption" style="font-weight: bold; border: 0px; font-size: x-large; font-weight: 100; padding-bottom: 15px; color: #919aa1; padding-left: 1px; cursor: unset;"></button>
+            <input type="hidden" name="hdnTabName" id="hdnTabName" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="tab">
+                @foreach (var itm in TabMenu)
+                {
+                    <button class="tablinks  @itm.ClassName" onclick="@itm.clickEvent">@itm.MenuName</button> 
+                }
+            </div>
+            @foreach (var itm in TabMenu)
+            {
+                <div id="@string.Format("div{0}",@itm.SerialNo)" class="tabcontent">
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('.@ClassName').addClass("active");
+    });
+
+    function SetTabName(tabName) {
+       // alert()
+         $.ajax({
+            url: '/admin/common/SetTabName',
+             type: "GET",
+             data: { TabName: tabName },
+            crossDomain: true,
+            contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+            dataType: "json",
+            headers: {},
+            crossDomain: true,
+            charset: "UTF-8",
+            cache: false,
+            xhrFields: {
+                withCredentials: true
+            },
+            error: function () {
+                console.log('error');
+            },
+             success: function (data) {
+                 return true;
+            }
+        });
+    }
+
+    //Program Path Tab
+    function openTab(evt, TabName) {
+        SetTabName(TabName);
+
+
+        $("clsCaption").html('');
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        if (TabName == "BasicInformation") {
+            AddBasic();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+
+        }
+        else if (TabName == "AddLearning") {
+            AddLearning(evt);
+
+        }
+        else if (TabName == "publishCourse") {
+            AddPublishCourse();
+            //document.getElementById(TabName).style.display = "block";
+            //evt.currentTarget.className += " active";
+        }
+    }
+
+    function AddBasic() {
+        var url = '@Url.Action("Create", "Program", new { isfrmTab = "Tab" })';
+        window.location.href = url
+    }
+
+    function AddLearning(evt) {
+        //debugger;
+        if ($("#ProgramCreate").length > 0) {
+
+            if ($("#ProgramName").val() == "" || $("#LearningCode").val() == "" || $("#TagId").val() == "") {
+                evt.currentTarget.className += " active";
+                alert("Please Create Structure");
+                return false;
+            }
+            else {
+                $("#frmTab").val("Tab")
+                $("#ProgramCreate").submit();
+            }
+        }
+        else {
+        var url = '@Url.Action("LearningIndex", "Program")';
+            window.location.href = url
+        }
+
+    }
+
+    function AddPublishCourse() {
+
+         $.ajax({
+            url: '/admin/Program/IspublishCourseAdd',
+            type: "GET",
+            crossDomain: true,
+            contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+            dataType: "json",
+            headers: {},
+            crossDomain: true,
+            charset: "UTF-8",
+            cache: false,
+            xhrFields: {
+                withCredentials: true
+            },
+            error: function () {
+                console.log('error');
+            },
+             success: function (data) {
+                if (data.status == 1) {
+                    var url = '@Url.Action("Index", "Course")';
+                    window.location.href = url
+                 }
+                else {
+                    alert("Please Create Structure");
+                    return false;
+                }
+            }
+        });
+    }
+    //
+    //Content Tab
+    function openTabContain(evt, TabName) {
+        SetTabName(TabName);
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        if (TabName == "BasicInformationContain") {
+            AddBasicContain();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "ContentInformation") {
+            AddContentInformation();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "ManageQuestion") {
+            AddManageQuestion();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+    }//Content Tab
+    function openTabTag(evt, TabName) {
+        SetTabName(TabName);
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        if (TabName == "ManageQuestionLevel") {
+            ManageQuestionLevel();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "AddQuestionLevel") {
+            AddQuestionLevel();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "ManageTagMaster") {
+            ManageTagMaster();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "CreateTagMaster") {
+            AddTagMaster();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "ManageCreditsMaster") {
+            ManageCreditsMaster();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "CreateCreditsMaster") {
+            AddCreditsMaster();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "ManageVideoSource") {
+            ManageVideoSource();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "CreateVideoSource") {
+            AddVideoSource();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "ManageContentType") {
+            ManageContentType();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "CreateContentType") {
+            AddContentType();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "ManageOccasion") {
+            ManageOccasion();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "CreateOccasion") {
+            AddOccasion();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "ManageProjectMaster") {
+            ManageProjectMaster();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "AddProjectMaster") {
+            AddProjectMaster();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "ManageCategoriesMaster") {
+            ManageCategoriesMaster();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }       
+    }
+    //Content Master
+    function ManageQuestionLevel() {
+         var url = '@Url.Action("QuestionLevelIndex", "Content")';
+                        window.location.href = url
+    }
+    function AddQuestionLevel() {
+         var url = '@Url.Action("CreateQuestionLevel", "Content")';
+                        window.location.href = url
+    }
+    function ManageTagMaster() {
+         var url = '@Url.Action("TagMasterIndex", "Content")';
+                        window.location.href = url
+    }
+    function AddTagMaster() {
+        var url = '@Url.Action("CreateTagMaster", "Content")';
+                        window.location.href = url
+    }
+    function ManageCreditsMaster() {
+         var url = '@Url.Action("ManageCreditsIndex", "Content")';
+                        window.location.href = url
+    }
+    function AddCreditsMaster() {
+        var url = '@Url.Action("CreateManageCredits", "Content")';
+                        window.location.href = url
+    }
+    function ManageVideoSource() {
+        var url = '@Url.Action("VideoSourceIndex", "Content")';
+                        window.location.href = url
+    }
+    function AddVideoSource() {
+        var url = '@Url.Action("CreateVideoSource", "Content")';
+                        window.location.href = url
+    }
+    function ManageContentType() {
+        var url = '@Url.Action("ContentTypeIndex", "Content")';
+                        window.location.href = url
+    }
+    function AddContentType() {
+        var url = '@Url.Action("CreateContentType", "Content")';
+                        window.location.href = url
+    }
+    function ManageOccasion() {
+        var url = '@Url.Action("OccasionIndex", "Content")';
+                        window.location.href = url
+    }
+    function AddOccasion() {
+        var url = '@Url.Action("CreateOccasion", "Content")';
+                        window.location.href = url
+    }
+
+    //
+
+    function AddBasicContain() {
+
+        var url = '@Url.Action("Create", "Content")';
+        window.location.href = url
+    }
+
+    function AddContentInformation() {
+        if ($("#Contentfrm").length > 0) {
+            $("#Contentinformation").val("frmTab")
+            $("#Contentfrm").submit();
+        }
+        else {
+        var url = '@Url.Action("ManageQuestion", "Quiz", new { isfrmTab = "Tab" })';
+            window.location.href = url
+        }
+    }
+    function AddManageQuestion() {
+        if ($("#Quiz").length > 0) {
+            $("#frmTab").val("frmTab")
+            $("#Quiz").submit();
+        }
+        else {
+            var url = '@Url.Action("ManageQuestion", "Quiz", new { isfrmTab = "Tab" })';
+            window.location.href = url
+        }
+
+    }
+
+    function AddManageQuestion1() {
+
+         $.ajax({
+             url: '/admin/Quiz/IsManageQuestionAdd',
+            type: "GET",
+            crossDomain: true,
+            contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+            dataType: "json",
+            headers: {},
+            crossDomain: true,
+            charset: "UTF-8",
+            cache: false,
+            xhrFields: {
+                withCredentials: true
+            },
+            error: function () {
+                console.log('error');
+            },
+             success: function (data) {
+                 if (data.status == 1) {
+                     var url = '@Url.Action("ManageQuestion", "Quiz", new { isfrmTab = "Tab" })';
+                     window.location.href = url
+                 }
+                 else {
+                     alert("Please create structure");
+                     return false;
+                 }
+            }
+        });
+    }
+
+
+    //
+    //Event Tab
+
+    function openTabEvent(evt, TabName) {
+        SetTabName(TabName);
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        if (TabName == "ManageTopics") {
+            ManageTopic();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "AddTopic") {
+            AddTopic();
+            document.getElementById(TabName).style.display = "block";
+            alert(TabName);
+            evt.currentTarget.className += " active";
+            alert(evt.currentTarget.className);
+        }
+        else if (TabName == "ManageInstructors") {
+            ManageInstructor();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "AddInstructor") {
+            AddInstructor();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+    }
+
+    function ManageTopic() {
+        var url = '@Url.Action("ManageTopics", "EventMasters")';
+                        window.location.href = url
+    }
+    function AddTopic() {
+        var url = '@Url.Action("Create", "EventMasters")';
+                        window.location.href = url
+    }
+    function ManageInstructor() {
+        var url = '@Url.Action("ManageInstructor", "EventMasters")';
+                        window.location.href = url
+    }
+    function AddInstructor() {
+        var url = '@Url.Action("CreateInstructor", "EventMasters")';
+                        window.location.href = url
+    }
+    //
+    // Question Tab
+
+    function openTabQuestion(evt, TabName) {
+        SetTabName(TabName);
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        if (TabName == "QuestionInformation") {
+            AddQuestion()
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "AddResponse") {
+            AddResponse();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "AddFeedBack") {
+            AddFeedback();
+
+        }
+    }
+    function AddQuestion() {
+        var url = '@Url.Action("AddQuestion", "Quiz", new { isfrmTab = "Tab" })';
+                        window.location.href = url
+    }
+    function AddResponse() {
+        if ($("#frmQuestions").length > 0) {
+            $("#frmQuestions").submit();
+            $('.secondTab').addClass("active");
+        }
+        else {
+            var url = '@Url.Action("AddResponse", "Quiz")';
+                        window.location.href = url
+        }
+
+    }
+
+    function AddFeedback() {
+        $("#feedbackerror").html('')
+         $.ajax({
+             url: '/admin/Quiz/IsAddFeedback',
+            type: "GET",
+            crossDomain: true,
+            contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+            dataType: "json",
+            headers: {},
+            crossDomain: true,
+            charset: "UTF-8",
+            cache: false,
+            xhrFields: {
+                withCredentials: true
+            },
+            error: function () {
+                console.log('error');
+            },
+             success: function (data) {
+                 if (data.status == 1) {
+                     $("#feedbackerror").html('')
+                     var url = '@Url.Action("AddFeedback", "Quiz")';
+                     window.location.href = url
+                 }
+                 else {
+                     $("#feedbackerror").html("Please Add FeedBack");
+                     //alert("Please Add FeedBack");
+                     return false;
+                 }
+            }
+        });
+    }
+
+    //Content Tab
+    function openTabMaster(evt, TabName) {
+
+        SetTabName(TabName);
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        if (TabName == "ManageQuestionLevel") {
+            ManageQuestionLevel();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "AddQuestionLevel") {
+            AddQuestionLevel();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "ManageTagMaster") {
+            ManageTagMaster();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "CreateTagMaster") {
+            AddTagMaster();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "CategoryMaster") {
+            ManageCategoryMaster();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "AddCategoryMaster") {
+            AddCategoryMaster();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "AddCategoryMaster") {
+            AddCategoryMaster();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "ManageCreditsMaster") {
+            ManageCreditsMaster();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "CreateCreditsMaster") {
+            AddCreditsMaster();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "ManageVideoSource") {
+            ManageVideoSource();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "CreateVideoSource") {
+            AddVideoSource();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "ManageContentType") {
+            ManageContentType();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "CreateContentType") {
+            AddContentType();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "ManageOccasion") {
+            ManageOccasion();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "CreateOccasion") {
+            AddOccasion();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+    }
+    function ManageQuestionLevel() {
+
+         var url = '@Url.Action("QuestionLevelIndex", "Content")';
+                        window.location.href = url
+    }
+    function AddQuestionLevel() {
+         var url = '@Url.Action("CreateQuestionLevel", "Content")';
+                        window.location.href = url
+    }
+    function ManageTagMaster() {
+         var url = '@Url.Action("TagMasterIndex", "Content")';
+                        window.location.href = url
+    }
+    function AddTagMaster() {
+        var url = '@Url.Action("CreateTagMaster", "Content")';
+                    window.location.href = url
+    }
+    function ManageCategoryMaster() {
+         var url = '@Url.Action("Index", "Category")';
+                        window.location.href = url
+    }
+    function AddCategoryMaster() {
+         var url = '@Url.Action("Create", "Category")';
+                        window.location.href = url
+    }
+    function AddCategoryMaster() {
+         var url = '@Url.Action("CreateCat", "Category")';
+                        window.location.href = url
+    }
+    function ManageCreditsMaster() {
+         var url = '@Url.Action("ManageCreditsIndex", "Content")';
+                        window.location.href = url
+    }
+    function AddCreditsMaster() {
+         var url = '@Url.Action("CreateManageCredits", "Content")';
+                        window.location.href = url
+    }
+    function ManageVideoSource() {
+        var url = '@Url.Action("VideoSourceIndex", "Content")';
+                        window.location.href = url
+    }
+    function AddVideoSource() {
+        var url = '@Url.Action("CreateVideoSource", "Content")';
+                        window.location.href = url
+    }
+    function ManageContentType() {
+        var url = '@Url.Action("ContentTypeIndex", "Content")';
+                        window.location.href = url
+    }
+    function AddContentType() {
+        var url = '@Url.Action("CreateContentType", "Content")';
+                        window.location.href = url
+    }
+    function ManageOccasion() {
+        var url = '@Url.Action("OccasionIndex", "Content")';
+                        window.location.href = url
+    }
+    function AddOccasion() {
+        var url = '@Url.Action("CreateOccasion", "Content")';
+                        window.location.href = url
+    }
+
+
+    //Videos Tab
+    function openTabVideos(evt, TabName) {
+        SetTabName(TabName);
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        if (TabName == "ManageProjectMaster") {
+            ManageProjectMaster();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        if (TabName == "ManageCategoriesMaster") {
+            ManageCategoriesMaster();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+    }//Videos Tab
+
+
+     function ManageProjectMaster() {
+        var url = '@Url.Action("ProjectMasterIndex", "VideoManagement")';
+        window.location.href = url
+     }
+    function ManageCategoriesMaster() {
+        var url = '@Url.Action("CategoryMasterIndex", "VideoManagement")';
+        window.location.href = url
+    }
+</script>

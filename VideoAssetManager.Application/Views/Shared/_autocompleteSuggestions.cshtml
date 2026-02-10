@@ -1,0 +1,107 @@
+﻿@{
+    string suggestionfor = "";
+    if (ViewData["suggestionfor"] != null)
+    {
+        suggestionfor = ViewData["suggestionfor"].ToString();
+    }
+}
+<style>
+   /* @@media(max-width: 425.219px) {
+        #ui-id-1 {
+            width: 425.719px !important;
+        }
+    }*/
+    .ui-autocomplete {
+       /* width: 517.234px !important;*/
+       max-height: 311px;
+        overflow-y: scroll !important;
+    }
+   
+
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #888;
+    }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    .scrollbar-thin {
+        background-color: lightgreen;
+        height: 150px;
+        width: 200px;
+        overflow-y: scroll;
+    }
+</style>
+
+<div class="box box-primary">
+    <div class="box-body">
+        <div class="row">
+            <div class="form-group" style="display: flex; flex-direction: row; justify-content: center; align-items: center; margin-left: -12px;">
+                <label style="display:none;" class="control-label" id="lblcustno">Search: </label>&nbsp;&nbsp;
+                <input type="text" value="" name="SearchString" id="SearchString" class="form-control" onchange="reloadgid()" onmouseout="loaddata()" onkeyup="reloadgid()" placeholder="Search..." />
+                <input type="hidden" name="hdnSearchId" id="hdnSearchId" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+<script type="text/javascript">
+         $(document).ready(function () {
+           $("#SearchString")
+            .autocomplete({
+                source: function (request, response) {
+                    $.getJSON('@Url.Action("AutocompleteSuggestions", "Common")',
+                        { term: $("#SearchString").val(), Params: '@suggestionfor' },
+                        response
+                    );
+                },
+                minLength: 1,
+                select: function (event, ui) {
+                    $("#SearchString").val(ui.item.name);
+                    if ($("#SearchString").val() != '')
+                    {
+                        $("#SearchString").val(ui.item.name);
+                        $("#hdnSearchId").val(ui.item.id);
+                        return false;
+                    } else { return false; };
+                    $("#SearchString").val('');
+                    return false;
+                },
+            })
+               .data("ui-autocomplete")._renderItem = function (ul, item) {
+                   return $("<li style='width: 452px !important;'></li>")
+                .data("item.autocomplete", item)
+                .append("<a'>"  + item.name + "</a>")
+                .appendTo(ul);
+                   
+        };
+    });
+
+    function reloadgid() {
+        $('#jqGrid').trigger('reloadGrid');
+        const SearchStringWidth = $('#SearchString').outerWidth()
+        $('#ui-id-1').css("width", SearchStringWidth + "px");
+        
+    }
+    function loaddata() {
+        $('#jqGrid').trigger('reloadGrid');
+        $("#load_jqGrid").hide();
+        const SearchStringWidth = $('#SearchString').outerWidth()
+        $('#ui-id-1').css("width", SearchStringWidth + "px");
+    }
+    $('#SearchString').keyup(function (e) {
+
+        if (e.keyCode == 13) {
+            $(this).trigger("enterKey");
+            $(".ui-autocomplete").hide();
+            $('#jqGrid').trigger('reloadGrid');
+        }
+    });
+</script>

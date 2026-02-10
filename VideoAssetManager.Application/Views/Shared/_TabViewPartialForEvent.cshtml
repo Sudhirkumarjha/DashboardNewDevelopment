@@ -1,0 +1,206 @@
+﻿@inject VideoAssetManager.DataAccess.VideoAssetManagerDBContext _VideoAssetManagerDBContext
+@{
+    string controllerName = string.Empty;
+    string action = string.Empty;
+    VideoAssetManager.DataAccess.Repository.QuickLinksRepository ql = new VideoAssetManager.DataAccess.Repository.QuickLinksRepository(_VideoAssetManagerDBContext);
+    if (@ViewContext.RouteData.Values["controller"] != null)
+    {
+        controllerName = @ViewContext.RouteData.Values["controller"].ToString();
+    }
+    if (@ViewContext.RouteData.Values["Action"] != null)
+    {
+        action = @ViewContext.RouteData.Values["Action"].ToString();
+    }
+}
+
+<style>
+    body {
+        font-family: Arial;
+    }
+
+    /* Style the tab */
+    .tab {
+        overflow: hidden;
+        border: 1px solid #ccc;
+        background-color: #f1f1f1;
+    }
+
+        /* Style the buttons inside the tab */
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 17px;
+
+        }
+
+            /* Change background color of buttons on hover */
+            .tab button:hover {
+                background-color: #ddd;
+            }
+
+            /* Create an active/current tablink class */
+            .tab button.active {
+                background-color: #ccc;
+            }
+
+    /* Style the tab content */
+    .tabcontent {
+        display: none;
+        padding: 6px 12px;
+        border: 0px solid #ccc;
+        border-top: none;
+    }
+</style>
+
+<div class="tab">
+    <button class="tablinks manageTopicsTab" onclick="openTab(event, 'ManageTopics')">Manage Topics</button>
+    <button class="tablinks addTopicTab" onclick="openTab(event, 'AddTopic')">Add Topic</button>
+    <button class="tablinks manageInstructorsTab" onclick="openTab(event, 'ManageInstructors')">Manage Instructors</button>
+    <button class="tablinks addInstructorTab" onclick="openTab(event, 'AddInstructor')">Add Instructor</button>
+</div>
+<div id="ManageTopics" class="tabcontent">
+</div>
+
+<div id="AddTopic" class="tabcontent">
+</div>
+
+<div id="ManageInstructors" class="tabcontent">
+</div>
+<div id="AddInstructor" class="tabcontent">
+</div>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script>
+    $(document).ready(function () {    
+        if (action == "ManageTopics") {
+            document.getElementById("ManageTopics").className += " active";
+            $(".manageTopicsTab").addClass("active");
+            document.getElementById("ManageTopics").style.display = "block";
+        } else if (action == "Create") {
+            document.getElementById("AddTopic").className += " active";
+            $(".addTopicTab").addClass("active");
+            document.getElementById("AddTopic").style.display = "block";
+        } else if (action == "CreateInstructor") {
+            document.getElementById("AddInstructor").className += " active";
+            $(".addInstructorTab").addClass("active");
+            document.getElementById("AddInstructor").style.display = "block";
+        } else if (action == "ManageInstructor") {
+            document.getElementById("ManageInstructors").className += " active";
+            $(".manageInstructorsTab").addClass("active");
+            document.getElementById("ManageInstructors").style.display = "block";
+        }
+    });
+    function openTab(evt, TabName) {
+
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        if (TabName == "ManageTopics") {
+            ManageTopic();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "AddTopic") {
+            AddTopic();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "ManageInstructors") {
+            ManageInstructor();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        else if (TabName == "AddInstructor") {
+            AddInstructor();
+            document.getElementById(TabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+    }
+
+    function ManageTopic() {
+      //  $(".manageTopicsTab").addClass("active")
+        var url = '@Url.Action("ManageTopics", "EventMasters")';
+                        window.location.href = url
+    }
+    function AddTopic() {
+       // $(".addTopicTab").addClass("active")
+        var url = '@Url.Action("Create", "EventMasters")';
+                        window.location.href = url
+    }
+    function ManageInstructor() {
+       // $(".manageInstructorsTab").addClass("active")
+        var url = '@Url.Action("ManageInstructor", "EventMasters")';
+                        window.location.href = url
+    }
+    function AddInstructor() {
+       // $(".addInstructorTab").addClass("active")
+        var url = '@Url.Action("CreateInstructor", "EventMasters")';
+                        window.location.href = url
+    }
+
+
+    @*function AddLearning() {
+        var ProgramName = $("#ProgramName").val();
+        var LearningCode = $("#LearningCode").val();
+        var Description = $("#Description").val();
+        var ProgramId = $("#ProgramId").val();
+        if (ProgramId == "") {
+            ProgramId = 0;
+        }
+        if (ProgramName == "") {
+            alert("Please enter Program Name");
+            document.getElementById("BasicInformation").className += " active";
+            $(".firsttime").addClass("active")
+            document.getElementById("BasicInformation").style.display = "block";
+            $("#BasicInformation").show();
+            return false;
+        }
+        if (LearningCode == 0) {
+            alert("Please enter Learning Code");
+            document.getElementById("BasicInformation").className += " active";
+            $(".firsttime").addClass("active")
+            document.getElementById("BasicInformation").style.display = "block";
+            $("#BasicInformation").show();
+            return false;
+        }
+        $.ajax({
+            url: '/admin/Program/CreateLearningIndex',
+            type: "GET",
+            data: { programName: ProgramName, learningCode: LearningCode, description: Description, programId: ProgramId },
+            crossDomain: true,
+            contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+            dataType: "json",
+            headers: {},
+            crossDomain: true,
+            charset: "UTF-8",
+            cache: false,
+            xhrFields: {
+                withCredentials: true
+            },
+            error: function () {
+                console.log('error');
+            },
+            success: function (data) {
+                document.getElementById("AddLearning").style.display = "block";
+                $(".firstTab").removeClass("active")
+                $(".secondTab").addClass("active")
+                document.getElementById("AddLearning").className += " active";
+                var url = '@Url.Action("LearningIndex", "Program")';
+                        window.location.href = url
+            }
+        });
+    }*@
+
+</script>
+

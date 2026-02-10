@@ -1,0 +1,55 @@
+﻿<div class="box box-primary">
+    <div class="box-body">
+        <div class="row">
+            <div class="PageCaption">
+                <div class="col-md-12 text-left">
+                    <a class="btn btn-primary float-right"
+                       asp-area="admin"
+                       asp-action="@ViewData["AspAction"]"
+                       asp-controller="@ViewData["AspController"]"
+                       title="@ViewData["Title"]">@ViewData["ButtonText"]</a>
+                </div>
+                <br />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 col-sm-6">
+                <input type="hidden" value="" name="hdncontent" id="hdncontent" />
+                <div class="form-group">
+                    <partial name="_autocompleteSuggestions" view-data="ViewData" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="table-responsive" id="table-responsive">
+                    <div class="inner_width">
+                        <table id="jqGrid"></table>
+                        <div id="jqGridPager"></div>
+                        <input type="hidden" id="hdnSelectedRows" name="hdnSelectedRows" />
+                        <input type="hidden" id="hdnAllRows" name="hdnAllRows" value="false" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="videoPopup" class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <video id="videoPlayer" controls style="width: 100%; height: auto;">
+                            <source src="" id="videoSource" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,325 @@
+﻿@model IEnumerable<VM_Project>
+@{
+    Random random = new Random();
+    int overviewListPageId = random.Next();
+    ViewData["suggestionfor"] = "Overview";
+
+    // Calculate totals once for reuse
+    var totalVideos = Model.Sum(p => p.NumberOfVideos ?? 0);
+    var totalHours = Model.Sum(p => decimal.TryParse(p.TotalVideoHours, out var hours) ? hours : 0);
+    var totalStorage = Model.Sum(p =>
+    {
+        var numericPart = System.Text.RegularExpressions.Regex.Match(p.TotalSpaceOccupied ?? "", @"\d+").Value;
+        return decimal.TryParse(numericPart, out var storage) ? storage : 0;
+    });
+}
+<link href="~/JqGrid/css/jqGridPage-ui.css" rel="stylesheet" />
+<style>
+    .ui-jqgrid tr.jqgrow td {
+        white-space: normal !important;
+    }
+    .summary-card .card {
+        height: 120px;
+    }
+    .card{
+        border:1px solid #000;
+    }
+</style>
+
+<div class="box box-primary">
+    <div class="box-body">
+       
+        <div class="row mb-3 summary-card">
+            <div class="col-md-4">
+                <div class="card #6c757d !important text-dark">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Videos</h5>
+                        <p class="card-text display-6">@totalVideos</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card #6c757d !important text-dark">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Hours</h5>
+                        <p class="card-text display-6">@totalHours.ToString("N1") Hours</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card #6c757d !important text-dark">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Storage</h5>
+                        <p class="card-text display-6">
+                            @{
+                                decimal totalStorageGB;
+                                if (totalStorage < 500)
+                                {
+                                    totalStorageGB = 0.5m;
+                                }
+                                else
+                                {
+                                    totalStorageGB = totalStorage / 1024;
+                                }
+                            }
+                            @totalStorageGB.ToString("N2") GB
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 col-sm-6">
+                <input type="hidden" value="" name="hdncontent" id="hdncontent" />
+                <div class="form-group">
+                    <partial name="_autocompleteSuggestions" view-data="ViewData" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="table-responsive" id="table-responsive">
+                    <div class="inner_width">
+                        <table id="jqGrid"></table>
+                        <div id="jqGridPager"></div>
+                        <input type="hidden" id="hdnSelectedRows" name="hdnSelectedRows" />
+                        <input type="hidden" id="hdnAllRows" name="hdnAllRows" value="false" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+        @section Scripts
+         {
+            <script src="~/lib/jquery/dist/js/jquery-ui.min.js"></script>
+            <script src="~/lib/jquery/dist/js/trirand/i18n/grid.locale-en.js"></script>
+            <script src="~/lib/jquery/dist/js/trirand/jquery.jqgrid.min.js"></script>
+            <script src="~/autocomplete/ui-1.1.2.1.min.js"></script>
+
+            <script type="text/javascript">
+
+        $(document).ready(function () {
+            $("#clsCaption").html("Manage Overview");
+            $("#SearchString").attr("placeholder", "Search for Name");
+            var selectedRows = [];
+            var AllRows = [];
+
+            $("#jqGrid").jqGrid({
+                url: '/admin/VideoManagement/OverviewDetails',
+                mtype: "GET",
+                datatype: "json",
+                contentType: "application/json",
+                postData: { TopSearch: function () { return $('#SearchString').val(); }, overviewPageId: @overviewListPageId },
+                colModel: [
+                    { label: 'Id', name: 'id', width: 100, align: "center", key: true, editable: true, hidden: true },
+                    { label: 'Name', name: 'name', width: 500, align: "left", editoptions: { value: "" }, editable: true, hidden: false, searchoptions: { sopt: ["cn", "nc", "eq", "ne", "nu", "nn"] }, coloptions: { filtering: false, seraching: false, freeze: false } },
+                    { label: 'Number Of Videos', name: 'numberOfVideos', width: 250, align: "center", editoptions: { value: "" }, editable: true, hidden: false, searchoptions: { sopt: ["cn", "nc", "eq", "ne", "nu", "nn"] }, coloptions: { filtering: false, seraching: false, freeze: false } },
+                    { label: 'Total Video Hours', name: 'totalVideoHours', width: 250, align: "left", editoptions: { value: "" }, editable: true, hidden: false, searchoptions: { sopt: ["cn", "nc", "eq", "ne", "nu", "nn"] }, coloptions: { filtering: false, seraching: false, freeze: false } },
+                    { label: 'Total Space Occupied', name: 'totalSpaceOccupied', width: 250, align: "center", editoptions: { value: "" }, editable: true, hidden: false, searchoptions: { sopt: ["cn", "nc", "eq", "ne", "nu", "nn"] }, coloptions: { filtering: false, seraching: false, freeze: false } },
+                  ],
+
+                viewrecords: true,
+                height: 'auto',
+                rowNum: 25,
+                rowList: [25, 50, 75, 100],
+                multiselect: false,
+                sortorder: "asc",
+                sortname: "id",
+                pager: "#jqGridPager",
+                gridview: true,
+                autoencode: true,
+                sortable: true,
+                colMenu: true,
+                subGrid: false,
+                autowidth: false,
+                emptyrecords: 'No records to display',
+
+                autowidth: true,
+                
+                onSelectRow: function (rowId, status, e) {
+                    if (status === false) {
+                        var index = selectedRows.indexOf(rowId);
+                        while (index > -1) {
+                            selectedRows.splice(index, 1);
+                            index = selectedRows.indexOf(rowId);
+                        }
+                    } else {
+                        var index = selectedRows.indexOf(rowId);
+                        if (index == -1) {
+                            selectedRows.push(rowId);
+                        }
+                    }
+                    $('#hdnSelectedRows').val(selectedRows.join(","));
+                },
+
+                onSelectRow: function (rowId, status, e) {
+                    if (status === false) {
+                        var index = selectedRows.indexOf(rowId);
+                        while (index > -1) {
+                            selectedRows.splice(index, 1);
+                            index = selectedRows.indexOf(rowId);
+                        }
+                        $('#hdnAllRows').val(false);
+                    } else {
+                        var index = selectedRows.indexOf(rowId);
+                        if (index == -1) {
+                            selectedRows.push(rowId);
+                        }
+                    }
+                    $('#hdnSelectedRows').val(selectedRows.join(","));
+                },
+                onSelectAll: function (rowIds, status) {
+                    if (status === true) {
+                        var PageIds = $('#jqGrid').jqGrid('getDataIDs');
+                        $.each(PageIds, function (i) {
+                            var index = selectedRows.indexOf(PageIds[i]);
+                            if (index == -1) {
+                                selectedRows.push(PageIds[i]);
+                            }
+                        });
+                    } else {
+                        var PageIds = $('#jqGrid').jqGrid('getDataIDs');
+                        $.each(PageIds, function (i) {
+                            var index = selectedRows.indexOf(PageIds[i]);
+                            while (index > -1) {
+                                selectedRows.splice(index, 1);
+                                index = selectedRows.indexOf(PageIds[i]);
+                            }
+                        });
+                        $('#hdnAllRows').val(false);
+                    }
+                    $('#hdnSelectedRows').val(selectedRows.join(","));
+                },
+
+                beforeSelectRow: function (rowid, e) {
+                    var $self = $(this),
+                        iCol = $.jgrid.getCellIndex($(e.target).closest("td")[0]),
+                        cm = $self.jqGrid("getGridParam", "colModel");
+                    if (cm[iCol].name === "View") {
+                        return false;
+                    }
+                    return true;
+                },
+                gridComplete: function () {
+                    var $self = $(this), rows = this.rows, i, iAction, tr,
+                        colModel = $self.jqGrid("getGridParam", "colModel"),
+                        idPrefix = $self.jqGrid("getGridParam", "idPrefix"),
+                        newOnClick = function (e) {
+                            var rowid = $(this).closest(".jqgrow").attr("id");
+                            e.stopPropagation();
+                            //window.location.href = "CreateProjectMaster?Id=" + rowid;
+                        };
+
+                    // find the index of the column with formatter: "actions"
+                    for (i = 0; i < colModel.length; i++) {
+                        if (colModel[i].formatter === "actions") {
+                            iAction = i;
+                            break;
+                        }
+                    }
+                    if (iAction === undefined) {
+                        return;
+                    }
+                    for (i = 0; i < rows.length; i++) {
+                        tr = rows[i];
+                        if ($(tr).hasClass("jqgrow")) {
+                            $(tr.cells[iAction]).find(".ui-inline-edit")
+                                .click(newOnClick)      // register new click event handler
+                                .prop("onclick", null); // remove standard behavior of Edit button
+                        }
+                    }
+                    $("#delmodjqGrid").attr("style:z-index: 950; top: 186px; left: 890px;");
+                }
+            });
+
+            $('#jqGrid').jqGrid('filterToolbar', { stringResult: true, searchOperators: true });
+
+            if ($(window).width() >= 1600) {
+                $("#jqGrid").setGridWidth(Math.round($("#table-responsive").width() - 2, true));
+            }
+            else {
+                $("#jqGrid").setGridWidth(Math.round($("#table-responsive .inner_width").width(), true));
+            }
+        });
+
+        function reloadGrid(cellValue, options, rowdata, action) {
+
+            $('#jqGrid').trigger('reloadGrid');
+        }
+        $(window).resize(function () {
+
+            setTimeout(function () {
+                if ($(window).width() >= 1600) {
+                    $("#jqGrid").setGridWidth(Math.round($("#table-responsive").width() - 2, true));
+                }
+                else {
+                    $("#jqGrid").setGridWidth(Math.round($("#table-responsive .inner_width").width(), true));
+                }
+            }, 500);
+        });
+
+        $('.sidebar-toggle').click(function () {
+
+            setTimeout(function () {
+                if ($(window).width() >= 1200) {
+                    $("#jqGrid").setGridWidth(Math.round($("#table-responsive").width() - 2, true));
+                }
+                else {
+                    $("#jqGrid").setGridWidth(Math.round($("#table-responsive .inner_width").width(), true));
+                }
+            }, 500);
+        });
+        function onEdit(cellValue, options, rowdata, action) {
+
+
+
+        }
+        $('#SearchString').bind("enterKey", function (e) {
+            $('#jqGrid').trigger('reloadGrid');
+        });
+        $('#SearchString').keyup(function (e) {
+            if (e.keyCode == 13) {
+                $(this).trigger("enterKey");
+                $('#jqGrid').trigger('reloadGrid');
+            }
+        });
+
+        function myelemactive(value, options) {
+            var el = document.createElement("select");
+            el.className = "editable inline-edit-cell ui-widget-content ui-corner-all";
+            el.style = "width: 100%;";
+            var selected = value.includes("JQcheck", 0);
+            if (selected) {
+                el.options.add(new Option("Active", "true", true, true));
+                el.options.add(new Option("Inactive", "false"));
+            }
+            else {
+                el.options.add(new Option("Active", "true"));
+                el.options.add(new Option("Inactive", "false", true, true));
+            }
+            return el;
+        }
+        function myvalueactive(elem, operation, value) {
+            if (operation === 'get') {
+                return $(elem).val();
+            } else if (operation === 'set') {
+                $('select', elem).val(value);
+            }
+        }
+
+        @*function IsActive(cellValue, options, rowdata, action) {
+
+            //var id = rowdata.id;
+            if (rowdata.active == true) {
+                return "<img style='cursor:pointer; width:25px;' title='Click to Deactivate' onclick=ChangeProjectStatus('" + rowdata.id +"') src=@ViewData["appurl"]JqGrid/css/images/JQcheck.png><img>";
+            }
+            else {
+                return "<img style='cursor:pointer; width:25px;' title='Click to Activate' onclick= ChangeProjectStatus('" + rowdata.id + "') src=@ViewData["appurl"]JqGrid/css/Images/JQclose.PNG><img>";
+            }
+        }*@
+
+            </script>
+        }

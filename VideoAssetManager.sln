@@ -1,0 +1,80 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.33027.164
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VideoAssetManager.CommonUtils", "VideoAssetManager.CommonUtils\VideoAssetManager.CommonUtils.csproj", "{EB7FD05F-8F80-4D70-8A45-C184EDC20E6F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VideoAssetManager.DataAccess", "VideoAssetManager.DataAccess\VideoAssetManager.DataAccess.csproj", "{D554E678-914E-4065-9EF4-AC9DC7EF4F2F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VideoAssetManager.Models", "VideoAssetManager.Models\VideoAssetManager.Models.csproj", "{37DB3914-3B4F-43FB-978D-836BDA2430AB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DB", "DB", "{33965112-C0A8-4DBF-83D2-A6E26733C2C7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Data", "Data", "{90B82AD5-DE92-411F-8A0C-06F37AF0EF40}"
+	ProjectSection(SolutionItems) = preProject
+		..\Master\Data\QuickLinkMaster.sql = ..\Master\Data\QuickLinkMaster.sql
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VideoAssetManager.DBUP", "VideoAssetManager.DBUP\VideoAssetManager.DBUP.csproj", "{B2BA4171-26A7-4566-86EA-9C3EE46C4ECE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VideoAssetManager.Application", "VideoAssetManager.Application\VideoAssetManager.Application.csproj", "{C8EEACA9-D412-4440-92AE-F01FBC49B109}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EB7FD05F-8F80-4D70-8A45-C184EDC20E6F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB7FD05F-8F80-4D70-8A45-C184EDC20E6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB7FD05F-8F80-4D70-8A45-C184EDC20E6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB7FD05F-8F80-4D70-8A45-C184EDC20E6F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D554E678-914E-4065-9EF4-AC9DC7EF4F2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D554E678-914E-4065-9EF4-AC9DC7EF4F2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D554E678-914E-4065-9EF4-AC9DC7EF4F2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D554E678-914E-4065-9EF4-AC9DC7EF4F2F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37DB3914-3B4F-43FB-978D-836BDA2430AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37DB3914-3B4F-43FB-978D-836BDA2430AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37DB3914-3B4F-43FB-978D-836BDA2430AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37DB3914-3B4F-43FB-978D-836BDA2430AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2BA4171-26A7-4566-86EA-9C3EE46C4ECE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2BA4171-26A7-4566-86EA-9C3EE46C4ECE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2BA4171-26A7-4566-86EA-9C3EE46C4ECE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2BA4171-26A7-4566-86EA-9C3EE46C4ECE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8EEACA9-D412-4440-92AE-F01FBC49B109}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8EEACA9-D412-4440-92AE-F01FBC49B109}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8EEACA9-D412-4440-92AE-F01FBC49B109}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8EEACA9-D412-4440-92AE-F01FBC49B109}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{90B82AD5-DE92-411F-8A0C-06F37AF0EF40} = {33965112-C0A8-4DBF-83D2-A6E26733C2C7}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {87858FA9-E688-4C57-B679-8C9388E65FF1}
+	EndGlobalSection
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 6
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = http://10.60.7.55:8080/tfs/rekhtacollection
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = VideoAssetManager.CommonUtils\\VideoAssetManager.CommonUtils.csproj
+		SccProjectName1 = VideoAssetManager.CommonUtils
+		SccLocalPath1 = VideoAssetManager.CommonUtils
+		SccProjectUniqueName2 = VideoAssetManager.DataAccess\\VideoAssetManager.DataAccess.csproj
+		SccProjectName2 = VideoAssetManager.DataAccess
+		SccLocalPath2 = VideoAssetManager.DataAccess
+		SccProjectUniqueName3 = VideoAssetManager.Models\\VideoAssetManager.Models.csproj
+		SccProjectName3 = VideoAssetManager.Models
+		SccLocalPath3 = VideoAssetManager.Models
+		SccProjectUniqueName4 = VideoAssetManager.DBUP\\VideoAssetManager.DBUP.csproj
+		SccProjectName4 = VideoAssetManager.DBUP
+		SccLocalPath4 = VideoAssetManager.DBUP
+		SccProjectUniqueName5 = VideoAssetManager.Application\\VideoAssetManager.Application.csproj
+		SccProjectName5 = VideoAssetManager.Application
+		SccLocalPath5 = VideoAssetManager.Application
+	EndGlobalSection
+EndGlobal

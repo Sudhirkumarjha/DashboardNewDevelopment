@@ -1,0 +1,49 @@
+﻿@model VM_CategoryMaster
+@inject VideoAssetManager.DataAccess.VideoAssetManagerDBContext _VideoAssetManagerDBContext
+@{
+    VideoAssetManager.DataAccess.Repository.QuickLinksRepository ql = new VideoAssetManager.DataAccess.Repository.QuickLinksRepository(_VideoAssetManagerDBContext);
+
+    ViewData["Title"] = "Add Category";
+}
+
+<style>
+    .ck.ck-content {
+        max-height: 250px;
+    }
+</style>
+
+<div class="PageCaption">
+    <div class="col-md-12 text-left">
+        <span style="font-size:x-large; font-weight:100">Add Category</span>
+        <a class="btn btn-primary float-right" asp-area="admin" asp-action="CategoryMasterIndex" asp-controller="VideoManagement" title="Manage Content">Manage Category</a>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 offset-md-3 border border-info rounded shadow p-4 bg-light" id="BasicInformation">
+
+            <section>
+                <form method="post" asp-controller="VideoManagement" asp-action="CreateCategory" id="account" enctype="multipart/form-data">
+
+                    <input type="hidden" asp-for="Id" id="Id" name="Id" />
+
+                    @await Html.PartialAsync("_FormInput", Tuple.Create("Category Name", "Name", Model?.Name ?? "", true, "text", ""))
+
+                    @await Html.PartialAsync("_FormInput", Tuple.Create("Display Order", "DisplayOrder", Model != null ? Model.DisplayOrder.ToString() : "", true, "number", ""))
+
+                    @await Html.PartialAsync("_TextareaInput", Tuple.Create("Description", "Description", Model?.Description ?? "", false, 20, 80))
+
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary mb-1">Save</button>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
+}

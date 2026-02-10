@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Coding Basic Standards</title>
+        <style>
+</style>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" integrity="sha384-yFRtMMDnQtDRO8rLpMIKrtPCD5jdktao2TV19YiZYWMDkUR5GQZR/NOVTdquEx1j" crossorigin="anonymous">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        
+        <script src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+        
+    </head>
+    <body class="vscode-body vscode-light">
+
+  <h1>Coding Standards</h1>
+
+<li><a href="#problem-traditional-approach">Problem (Traditional Approach)</a></li>
+<li><a href="#cqrs-command-query-responsibility-segregation-pattern">CQRS (Command Query Responsibility Segregation) Pattern</a>
+<ul>
+<li><a href="#benefits-of-cqrs">Benefits of CQRS</a></li>
+<li><a href="#introduction-architecture">Introduction (Architecture)</a></li>
+<li><a href="#data-read-and-write-flow">Data read and write Flow</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#performance">Performance</a>
+<ul>
+<li><a href="#cache-aggressively">Cache aggressively</a></li>
+<li><a href="#avoid-blocking-calls">Avoid blocking calls</a></li>
+<li><a href="#optimize-data-access-and-io">Optimize data access and I/O</a></li>
+<li><a href="#pool-http-connections-with-httpclientfactory">Pool HTTP connections with HttpClientFactory</a></li>
+<li><a href="#performance-and-reliability">Performance and reliability</a></li>
+<li><a href="#avoid-synchronous-read-or-write-on-httprequesthttpresponse-body">Avoid synchronous read or write on HttpRequest/HttpResponse body</a></li>
+<li><a href="#prefer-readformasync-over-requestform">Prefer ReadFormAsync over Request.Form</a></li>
+<li><a href="#avoid-reading-large-request-bodies-or-response-bodies-into-memory">Avoid reading large request bodies or response bodies into memory</a></li>
+<li><a href="#working-with-a-synchronous-data-processing-api">Working with a synchronous data processing API</a></li>
+<li><a href="#do-not-capture-the-httpcontext-in-background-threads">Do not capture the HttpContext in background threads</a></li>
+<li><a href="#do-not-capture-services-injected-into-the-controllers-on-background-threads">Do not capture services injected into the controllers on background threads</a></li>
+</ul>
+</li>
+<li><a href="#c-coding-conventions">C# Coding Conventions</a>
+<ul>
+<li><a href="#naming-conventions">Naming conventions</a>
+<ul>
+<li><a href="#pascal-case">Pascal case</a></li>
+<li><a href="#camel-case">Camel case</a></li>
+<li><a href="#additional-naming-conventions">Additional naming conventions</a></li>
+</ul>
+</li>
+<li><a href="#layout-conventions">Layout conventions</a>
+<ul>
+<li><a href="#implicitly-typed-local-variables">Implicitly typed local variables</a></li>
+<li><a href="#unsigned-data-types">Unsigned data types</a></li>
+<li><a href="#arrays">Arrays</a></li>
+<li><a href="#try-catch--and--using--statements-in-exception-handling"><code>try</code>-<code>catch</code>  and  <code>using</code>  statements in exception handling</a></li>
+<li><a href="#new--operator"><code>new</code>  operator</a></li>
+<li><a href="#static-members">Static members</a></li>
+<li><a href="#linq-queries">LINQ queries</a></li>
+</ul>
+</li>
+<li><a href="#the-general-rule-to-follow-use-visual-studio-defaults">The general rule to follow &quot;use Visual Studio defaults&quot;</a></li>
+</ul>
+</li>
+</ul>
+<h1 id="introduction">Introduction</h1>
+<p>The purpose of this document is to provide coding basic standards</p>
+
+<div style="page-break-after: always; visibility: hidden"> 
+\pagebreak 
+</div>
+
+
+
+<h1 id="performance">Performance</h1>
+<p>A hot code path is defined as a code path that is frequently called and where much of the execution time occurs. Hot code paths typically limit app scale-out and performance and are discussed in several parts of this document.</p>
+<h2 id="cache-aggressively">Cache aggressively</h2>
+<p>Caching is discussed in several parts of this document. For more information, see  <a href="https://docs.microsoft.com/en-us/aspnet/core/performance/caching/response?view=aspnetcore-5.0">Response caching in ASP.NET Core</a>.</p>
+<h2 id="avoid-blocking-calls">Avoid blocking calls</h2>
+<p><a href="http://ASP.NET">ASP.NET</a> Core apps should be designed to process many requests simultaneously. Asynchronous APIs allow a small pool of threads to handle thousands of concurrent requests by not waiting on blocking calls. Rather than waiting on a long-running synchronous task to complete, the thread can work on another request.</p>
+<p>A common performance problem in <a href="http://ASP.NET">ASP.NET</a> Core apps is blocking calls that could be asynchronous. Many synchronous blocking calls lead to  <a href="https://docs.microsoft.com/en-us/archive/blogs/vancem/diagnosing-net-core-threadpool-starvation-with-perfview-why-my-service-is-not-saturating-all-cores-or-seems-to-stall">Thread Pool starvation</a>  and degraded response times.</p>
+<p><strong>Do not</strong>:</p>
+<ul>
+<li>Block asynchronous execution by calling  <a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.wait">Task.Wait</a>  or  <a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.tasks.task-1.result">Task.Result</a>.</li>
+<li>Acquire locks in common code paths. <a href="http://ASP.NET">ASP.NET</a> Core apps are most performant when architected to run code in parallel.</li>
+<li>Call  <a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.run">Task.Run</a>  and immediately await it. <a href="http://ASP.NET">ASP.NET</a> Core already runs app code on normal Thread Pool threads, so calling Task.Run only results in extra unnecessary Thread Pool scheduling. Even if the scheduled code would block a thread, Task.Run does not prevent that.</li>
+</ul>
+<p><strong>Do</strong>:</p>
+<ul>
+<li>Make  <a href="https://docs.microsoft.com/en-us/aspnet/core/performance/performance-best-practices?view=aspnetcore-5.0#understand-hot-code-paths">hot code paths</a>  asynchronous.</li>
+<li>Call data access, I/O, and long-running operations APIs asynchronously if an asynchronous API is available. Do  <strong>not</strong>  use  <a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.run">Task.Run</a>  to make a synchronous API asynchronous.</li>
+<li>Make controller/Razor Page actions asynchronous. The entire call stack is asynchronous in order to benefit from  <a href="https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/async/">async/await</a>  patterns.</li>
+</ul>
+<p>A profiler, such as  <a href="https://github.com/Microsoft/perfview">PerfView</a>, can be used to find threads frequently added to the  <a href="https://docs.microsoft.com/en-us/windows/desktop/procthread/thread-pools">Thread Pool</a>. The  <code>Microsoft-Windows-DotNETRuntime/ThreadPoolWorkerThread/Start</code>  event indicates a thread added to the thread pool.</p>
+<h2 id="optimize-data-access-and-io">Optimize data access and I/O</h2>
+<p>Interactions with a data store and other remote services are often the slowest parts of an <a href="http://ASP.NET">ASP.NET</a> Core app. Reading and writing data efficiently is critical for good performance.</p>
+<p>Recommendations:</p>
+<ul>
+<li><strong>Do</strong>  call all data access APIs asynchronously.</li>
+<li><strong>Do not</strong>  retrieve more data than is necessary. Write queries to return just the data that's necessary for the current HTTP request.</li>
+<li><strong>Do</strong>  consider caching frequently accessed data retrieved from a database or remote service if slightly out-of-date data is acceptable. Depending on the scenario, use a  <a href="https://docs.microsoft.com/en-us/aspnet/core/performance/caching/memory?view=aspnetcore-5.0">MemoryCache</a>  or a  <a href="https://docs.microsoft.com/en-us/aspnet/core/performance/caching/distributed?view=aspnetcore-5.0">DistributedCache</a>. For more information, see  <a href="https://docs.microsoft.com/en-us/aspnet/core/performance/caching/response?view=aspnetcore-5.0">Response caching in ASP.NET Core</a>.</li>
+<li><strong>Do</strong>  minimize network round trips. The goal is to retrieve the required data in a single call rather than several calls.</li>
+<li><strong>Do</strong>  use  <a href="https://docs.microsoft.com/en-us/ef/core/querying/tracking#no-tracking-queries">no-tracking queries</a>  in Entity Framework Core when accessing data for read-only purposes. EF Core can return the results of no-tracking queries more efficiently.</li>
+<li><strong>Do</strong>  filter and aggregate LINQ queries (with  <code>.Where</code>,  <code>.Select</code>, or  <code>.Sum</code>  statements, for example) so that the filtering is performed by the database.</li>
+<li><strong>Do</strong>  consider that EF Core resolves some query operators on the client, which may lead to inefficient query execution. For more information, see  <a href="https://docs.microsoft.com/en-us/ef/core/querying/client-eval#client-evaluation-performance-issues">Client evaluation performance issues</a>.</li>
+<li><strong>Do not</strong>  use projection queries on collections, which can result in executing &quot;N + 1&quot; SQL queries. For more information, see  <a href="https://docs.microsoft.com/en-us/ef/core/what-is-new/ef-core-2.1#optimization-of-correlated-subqueries">Optimization of correlated subqueries</a>.</li>
+</ul>
+<h2 id="pool-http-connections-with-httpclientfactory">Pool HTTP connections with HttpClientFactory</h2>
+<p>Although  <a href="https://docs.microsoft.com/en-us/dotnet/api/system.net.http.httpclient">HttpClient</a>  implements the  <code>IDisposable</code>  interface, it's designed for reuse. Closed  <code>HttpClient</code>  instances leave sockets open in the  <code>TIME_WAIT</code>  state for a short period of time. If a code path that creates and disposes of  <code>HttpClient</code>  objects is frequently used, the app may exhaust available sockets.  <a href="https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests">HttpClientFactory</a>  was introduced in <a href="http://ASP.NET">ASP.NET</a> Core 2.1 as a solution to this problem. It handles pooling HTTP connections to optimize performance and reliability.</p>
+<p>Recommendations:</p>
+<ul>
+<li><strong>Do not</strong>  create and dispose of  <code>HttpClient</code>  instances directly.</li>
+<li><strong>Do</strong>  use  <a href="https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests">HttpClientFactory</a>  to retrieve  <code>HttpClient</code>  instances. For more information, see  <a href="https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests">Use HttpClientFactory to implement resilient HTTP requests</a>.</li>
+</ul>
+<h2 id="performance-and-reliability">Performance and reliability</h2>
+<p>The following sections provide performance tips and known reliability problems and solutions.</p>
+<h2 id="avoid-synchronous-read-or-write-on-httprequesthttpresponse-body">Avoid synchronous read or write on HttpRequest/HttpResponse body</h2>
+<p>All I/O in <a href="http://ASP.NET">ASP.NET</a> Core is asynchronous. Servers implement the  <code>Stream</code>  interface, which has both synchronous and asynchronous overloads. The asynchronous ones should be preferred to avoid blocking thread pool threads. Blocking threads can lead to thread pool starvation.</p>
+<p><strong>Do not do this:</strong>  The following example uses the  ReadToEnd. It blocks the current thread to wait for the result.</p>
+<pre><code class="language-C#"><div><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">BadStreamReaderController</span> : <span class="hljs-title">Controller</span>
+{
+    [<span class="hljs-meta">HttpGet(<span class="hljs-meta-string">&quot;/contoso&quot;</span>)</span>]
+    <span class="hljs-function"><span class="hljs-keyword">public</span> ActionResult&lt;ContosoData&gt; <span class="hljs-title">Get</span>(<span class="hljs-params"></span>)</span>
+    {
+        <span class="hljs-keyword">var</span> json = <span class="hljs-keyword">new</span> StreamReader(Request.Body).ReadToEnd();
+
+        <span class="hljs-keyword">return</span> JsonSerializer.Deserialize&lt;ContosoData&gt;(json);
+    }
+}
+</div></code></pre>
+<p>In the preceding code,  <code>Get</code>  synchronously reads the entire HTTP request body into memory. If the client is slowly uploading, the app is doing sync over async. The app does sync over async because Kestrel does  <strong>NOT</strong>  support synchronous reads.</p>
+<p><strong>Do this:</strong>  The following example uses  ReadToEndAsync,  and does not block the thread while reading.</p>
+<pre><code class="language-C#"><div><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">GoodStreamReaderController</span> : <span class="hljs-title">Controller</span>
+{
+    [<span class="hljs-meta">HttpGet(<span class="hljs-meta-string">&quot;/contoso&quot;</span>)</span>]
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">async</span> Task&lt;ActionResult&lt;ContosoData&gt;&gt; Get()
+    {
+        <span class="hljs-keyword">var</span> json = <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> StreamReader(Request.Body).ReadToEndAsync();
+        <span class="hljs-keyword">return</span> JsonSerializer.Deserialize&lt;ContosoData&gt;(json);
+    }
+}
+</div></code></pre>
+<p><strong>Do this:</strong>  The following example is fully asynchronous using a non buffered request body:</p>
+<pre><code class="language-C#"><div><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">GoodStreamReaderController</span> : <span class="hljs-title">Controller</span>
+{
+    [<span class="hljs-meta">HttpGet(<span class="hljs-meta-string">&quot;/contoso&quot;</span>)</span>]
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">async</span> Task&lt;ActionResult&lt;ContosoData&gt;&gt; Get()
+    {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">await</span> JsonSerializer.DeserializeAsync&lt;ContosoData&gt;(Request.Body);
+    }
+}
+</div></code></pre>
+<p>The preceding code asynchronously de-serializes the request body into a C# object.</p>
+<h2 id="prefer-readformasync-over-requestform">Prefer ReadFormAsync over Request.Form</h2>
+<p>Use  <code>HttpContext.Request.ReadFormAsync</code>  instead of  <code>HttpContext.Request.Form</code>.  <code>HttpContext.Request.Form</code>  can be safely read only with the following conditions:</p>
+<ul>
+<li>The form has been read by a call to  <code>ReadFormAsync</code>, and</li>
+<li>The cached form value is being read using  <code>HttpContext.Request.Form</code></li>
+</ul>
+<p><strong>Do not do this:</strong>  The following example uses  <code>HttpContext.Request.Form</code>.  <code>HttpContext.Request.Form</code>  uses  <a href="https://github.com/davidfowl/AspNetCoreDiagnosticScenarios/blob/master/AsyncGuidance.md#warning-sync-over-async">sync over async</a>  and can lead to thread pool starvation.</p>
+<pre><code class="language-C#"><div><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">BadReadController</span> : <span class="hljs-title">Controller</span>
+{
+    [<span class="hljs-meta">HttpPost(<span class="hljs-meta-string">&quot;/form-body&quot;</span>)</span>]
+    <span class="hljs-function"><span class="hljs-keyword">public</span> IActionResult <span class="hljs-title">Post</span>(<span class="hljs-params"></span>)</span>
+    {
+        <span class="hljs-keyword">var</span> form =  HttpContext.Request.Form;
+        Process(form[<span class="hljs-string">&quot;id&quot;</span>], form[<span class="hljs-string">&quot;name&quot;</span>]);
+        <span class="hljs-keyword">return</span> Accepted();
+    }
+</div></code></pre>
+<p><strong>Do this:</strong>  The following example uses  <code>HttpContext.Request.ReadFormAsync</code>  to read the form body asynchronously.</p>
+<pre><code class="language-C#"><div><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">GoodReadController</span> : <span class="hljs-title">Controller</span>
+{
+    [<span class="hljs-meta">HttpPost(<span class="hljs-meta-string">&quot;/form-body&quot;</span>)</span>]
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">async</span> Task&lt;IActionResult&gt; <span class="hljs-title">Post</span>(<span class="hljs-params"></span>)</span>
+    {
+       <span class="hljs-keyword">var</span> form = <span class="hljs-keyword">await</span> HttpContext.Request.ReadFormAsync();
+        Process(form[<span class="hljs-string">&quot;id&quot;</span>], form[<span class="hljs-string">&quot;name&quot;</span>]);
+        <span class="hljs-keyword">return</span> Accepted();
+    }
+</div></code></pre>
+<h2 id="avoid-reading-large-request-bodies-or-response-bodies-into-memory">Avoid reading large request bodies or response bodies into memory</h2>
+<p>In .NET, every object allocation greater than 85 KB ends up in the large object heap (<a href="https://blogs.msdn.microsoft.com/maoni/2006/04/19/large-object-heap/">LOH</a>). Large objects are expensive in two ways:</p>
+<ul>
+<li>The allocation cost is high because the memory for a newly allocated large object has to be cleared. The CLR guarantees that memory for all newly allocated objects is cleared.</li>
+<li>LOH is collected with the rest of the heap. LOH requires a full  <a href="https://docs.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals">garbage collection</a>  or  <a href="https://docs.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals#generations">Gen2 collection</a>.</li>
+</ul>
+<p>This  <a href="https://adamsitnik.com/Array-Pool/#the-problem">blog post</a>  describes the problem succinctly:</p>
+<blockquote>
+<p>When a large object is allocated, it's marked as Gen 2 object. Not Gen 0 as for small objects. The consequences are that if you run out of memory in LOH, GC cleans up the whole managed heap, not only LOH. So it cleans up Gen 0, Gen 1 and Gen 2 including LOH. This is called full garbage collection and is the most time-consuming garbage collection. For many applications, it can be acceptable. But definitely not for high-performance web servers, where few big memory buffers are needed to handle an average web request (read from a socket, decompress, decode JSON &amp; more).</p>
+</blockquote>
+<p>Naively storing a large request or response body into a single  <code>byte[]</code>  or  <code>string</code>:</p>
+<ul>
+<li>May result in quickly running out of space in the LOH.</li>
+<li>May cause performance issues for the app because of full GCs running.</li>
+</ul>
+<h2 id="working-with-a-synchronous-data-processing-api">Working with a synchronous data processing API</h2>
+<p>When using a serializer/de-serializer that only supports synchronous reads and writes (for example, <a href="https://www.newtonsoft.com/json/help/html/Introduction.htm">JSON.NET</a>):</p>
+<ul>
+<li>Buffer the data into memory asynchronously before passing it into the serializer/de-serializer.</li>
+</ul>
+<p><a href="http://ASP.NET">ASP.NET</a> Core 3.0 uses  <a href="https://docs.microsoft.com/en-us/dotnet/api/system.text.json">System.Text.Json</a>  by default for JSON serialization.  <a href="https://docs.microsoft.com/en-us/dotnet/api/system.text.json">System.Text.Json</a>:</p>
+<ul>
+<li>Reads and writes JSON asynchronously.</li>
+<li>Is optimized for UTF-8 text.</li>
+<li>Typically higher performance than  <code>Newtonsoft.Json</code>.</li>
+</ul>
+<h2 id="do-not-capture-the-httpcontext-in-background-threads">Do not capture the HttpContext in background threads</h2>
+<p><strong>Do not do this:</strong>  The following example shows a closure is capturing the  <code>HttpContext</code>  from the  <code>Controller</code>  property. This is a bad practice because the work item could:</p>
+<ul>
+<li>Run outside of the request scope.</li>
+<li>Attempt to read the wrong  <code>HttpContext</code>.</li>
+</ul>
+<pre><code class="language-C#"><div>[<span class="hljs-meta">HttpGet(<span class="hljs-meta-string">&quot;/fire-and-forget-1&quot;</span>)</span>]
+<span class="hljs-function"><span class="hljs-keyword">public</span> IActionResult <span class="hljs-title">BadFireAndForget</span>(<span class="hljs-params"></span>)</span>
+{
+    _ = Task.Run(<span class="hljs-keyword">async</span> () =&gt;
+    {
+        <span class="hljs-keyword">await</span> Task.Delay(<span class="hljs-number">1000</span>);
+        <span class="hljs-keyword">var</span> path = HttpContext.Request.Path;
+        Log(path);
+    });
+    <span class="hljs-keyword">return</span> Accepted();
+}
+</div></code></pre>
+<p><strong>Do this:</strong>  The following example:</p>
+<ul>
+<li>Copies the data required in the background task during the request.</li>
+<li>Doesn't reference anything from the controller.</li>
+</ul>
+<pre><code class="language-C#"><div>[<span class="hljs-meta">HttpGet(<span class="hljs-meta-string">&quot;/fire-and-forget-3&quot;</span>)</span>]
+<span class="hljs-function"><span class="hljs-keyword">public</span> IActionResult <span class="hljs-title">GoodFireAndForget</span>(<span class="hljs-params"></span>)</span>
+{
+    <span class="hljs-keyword">string</span> path = HttpContext.Request.Path;
+    _ = Task.Run(<span class="hljs-keyword">async</span> () =&gt;
+    {
+        <span class="hljs-keyword">await</span> Task.Delay(<span class="hljs-number">1000</span>);
+        Log(path);
+    });
+    <span class="hljs-keyword">return</span> Accepted();
+}
+</div></code></pre>
+<h2 id="do-not-capture-services-injected-into-the-controllers-on-background-threads">Do not capture services injected into the controllers on background threads</h2>
+<p><strong>Do not do this:</strong>  The following example shows a closure is capturing the  <code>DbContext</code>  from the  <code>Controller</code>  action parameter. This is a bad practice. The work item could run outside of the request scope. The  <code>ContosoDbContext</code>  is scoped to the request, resulting in an  <code>ObjectDisposedException</code>.</p>
+<pre><code class="language-C#"><div>[<span class="hljs-meta">HttpGet(<span class="hljs-meta-string">&quot;/fire-and-forget-1&quot;</span>)</span>]
+<span class="hljs-function"><span class="hljs-keyword">public</span> IActionResult <span class="hljs-title">FireAndForget1</span>(<span class="hljs-params">[FromServices]ContosoDbContext context</span>)</span>
+{
+    _ = Task.Run(<span class="hljs-keyword">async</span> () =&gt;
+    {
+        <span class="hljs-keyword">await</span> Task.Delay(<span class="hljs-number">1000</span>);
+        context.Contoso.Add(<span class="hljs-keyword">new</span> Contoso());
+        <span class="hljs-keyword">await</span> context.SaveChangesAsync();
+    });
+    <span class="hljs-keyword">return</span> Accepted();
+}
+</div></code></pre>
+<p><strong>Do this:</strong>  The following example:</p>
+<ul>
+<li>Injects an  <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicescopefactory">IServiceScopeFactory</a>  in order to create a scope in the background work item.  <code>IServiceScopeFactory</code>  is a singleton.</li>
+<li>Creates a new dependency injection scope in the background thread.</li>
+<li>Doesn't reference anything from the controller.</li>
+<li>Doesn't capture the  <code>ContosoDbContext</code>  from the incoming request.</li>
+</ul>
+<pre><code class="language-C#"><div>[<span class="hljs-meta">HttpGet(<span class="hljs-meta-string">&quot;/fire-and-forget-3&quot;</span>)</span>]
+<span class="hljs-function"><span class="hljs-keyword">public</span> IActionResult <span class="hljs-title">FireAndForget3</span>(<span class="hljs-params">[FromServices]IServiceScopeFactory 
+                                    serviceScopeFactory</span>)</span>
+{
+    _ = Task.Run(<span class="hljs-keyword">async</span> () =&gt;
+    {
+        <span class="hljs-keyword">await</span> Task.Delay(<span class="hljs-number">1000</span>);
+        <span class="hljs-keyword">using</span> (<span class="hljs-keyword">var</span> scope = serviceScopeFactory.CreateScope())
+        {
+            <span class="hljs-keyword">var</span> context = scope.ServiceProvider.GetRequiredService&lt;ContosoDbContext&gt;();
+            context.Contoso.Add(<span class="hljs-keyword">new</span> Contoso());
+            <span class="hljs-keyword">await</span> context.SaveChangesAsync();                                        
+        }
+    });
+    <span class="hljs-keyword">return</span> Accepted();
+}
+</div></code></pre>
+<p>The following highlighted code:</p>
+<ul>
+<li>Creates a scope for the lifetime of the background operation and resolves services from it.</li>
+<li>Uses  <code>ContosoDbContext</code>  from the correct scope.</li>
+</ul>
+<pre><code class="language-C#"><div>[<span class="hljs-meta">HttpGet(<span class="hljs-meta-string">&quot;/fire-and-forget-3&quot;</span>)</span>]
+<span class="hljs-function"><span class="hljs-keyword">public</span> IActionResult <span class="hljs-title">FireAndForget3</span>(<span class="hljs-params">[FromServices]IServiceScopeFactory 
+                                    serviceScopeFactory</span>)</span>
+{
+    _ = Task.Run(<span class="hljs-keyword">async</span> () =&gt;
+    {
+        <span class="hljs-keyword">await</span> Task.Delay(<span class="hljs-number">1000</span>);
+        <span class="hljs-keyword">using</span> (<span class="hljs-keyword">var</span> scope = serviceScopeFactory.CreateScope())
+        {
+            <span class="hljs-keyword">var</span> context = scope.ServiceProvider.GetRequiredService&lt;ContosoDbContext&gt;();
+            context.Contoso.Add(<span class="hljs-keyword">new</span> Contoso());
+            <span class="hljs-keyword">await</span> context.SaveChangesAsync();                                        
+        }
+    });
+    <span class="hljs-keyword">return</span> Accepted();
+}
+</div></code></pre>
+<h1 id="c-coding-conventions"><a href="https://docs.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions">C# Coding Conventions</a></h1>
+<p>Coding conventions serve the following purposes:</p>
+<ul>
+<li>They create a consistent look to the code, so that readers can focus on content, not layout.</li>
+<li>They enable readers to understand the code more quickly by making assumptions based on previous experience.</li>
+<li>They facilitate copying, changing, and maintaining the code.</li>
+<li>They demonstrate C# best practices.</li>
+</ul>
+<h2 id="naming-conventions">Naming conventions</h2>
+<p>There are several naming conventions to consider when writing C# code.</p>
+<h3 id="pascal-case">Pascal case</h3>
+<p>Use pascal casing (&quot;PascalCasing&quot;) when naming a  <code>class</code>,  <code>record</code>, or  <code>struct</code>.</p>
+<pre><code class="language-C#"><div><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">DataService</span>
+{
+}
+</div></code></pre>
+<pre><code class="language-C#"><div><span class="hljs-function"><span class="hljs-keyword">public</span> record <span class="hljs-title">PhysicalAddress</span>(<span class="hljs-params">
+    <span class="hljs-keyword">string</span> Street,
+    <span class="hljs-keyword">string</span> City,
+    <span class="hljs-keyword">string</span> StateOrProvince,
+    <span class="hljs-keyword">string</span> ZipCode</span>)</span>;
+
+</div></code></pre>
+<pre><code class="language-C#"><div><span class="hljs-keyword">public</span> <span class="hljs-keyword">struct</span> ValueCoordinate
+{
+}
+</div></code></pre>
+<p>When naming an  <code>interface</code>, use pascal casing in addition to prefixing the name with an  <code>I</code>. This clearly indicates to consumers that it's an  <code>interface</code>.</p>
+<pre><code class="language-C#"><div><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title">IWorkerQueue</span>
+{
+}
+</div></code></pre>
+<p>When naming  <code>public</code>  members of types, such as fields, properties, events, methods, and local functions, use pascal casing.</p>
+<pre><code class="language-C#"><div><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">ExampleEvents</span>
+{
+    <span class="hljs-comment">// A public field, these should be used sparingly</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">bool</span> IsValid;
+
+    <span class="hljs-comment">// An init-only property</span>
+    <span class="hljs-keyword">public</span> IWorkerQueue WorkerQueue { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">init</span>; }
+
+    <span class="hljs-comment">// An event</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">event</span> Action EventProcessing;
+
+    <span class="hljs-comment">// Method</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">StartEventProcessing</span>(<span class="hljs-params"></span>)</span>
+    {
+        <span class="hljs-comment">// Local function</span>
+        <span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">int</span> <span class="hljs-title">CountQueueItems</span>(<span class="hljs-params"></span>)</span> =&gt; WorkerQueue.Count;
+        <span class="hljs-comment">// ...</span>
+    }
+}
+</div></code></pre>
+<p>When writing positional records, use pascal casing for parameters as they're the public properties of the record.</p>
+<pre><code class="language-C#"><div><span class="hljs-function"><span class="hljs-keyword">public</span> record <span class="hljs-title">PhysicalAddress</span>(<span class="hljs-params">
+    <span class="hljs-keyword">string</span> Street,
+    <span class="hljs-keyword">string</span> City,
+    <span class="hljs-keyword">string</span> StateOrProvince,
+    <span class="hljs-keyword">string</span> ZipCode</span>)</span>;
+</div></code></pre>
+<h3 id="camel-case">Camel case</h3>
+<p>Use camel casing (&quot;camelCasing&quot;) when naming  <code>private</code>  or  <code>internal</code>  fields, and prefix them with  <code>_</code>.</p>
+<p>C#Copy</p>
+<pre><code class="language-C#"><div><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">DataService</span>
+{
+    <span class="hljs-keyword">private</span> IWorkerQueue _workerQueue;
+}
+</div></code></pre>
+<p>When editing C# code that follows these naming conventions in an IDE that supports statement completion, typing  <code>_</code>  will show all of the object-scoped members.</p>
+<p>When working with  <code>static</code>  fields that are  <code>private</code>  or  <code>internal</code>, use the  <code>s_</code>  prefix and for thread static use  <code>t_</code>.</p>
+<pre><code class="language-C#"><div><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">DataService</span>
+{
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> IWorkerQueue s_workerQueue;
+
+    [<span class="hljs-meta">ThreadStatic</span>]
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> TimeSpan t_timeSpan;
+}
+</div></code></pre>
+<p>When writing method parameters, use camel casing.</p>
+<pre><code class="language-C#"><div><span class="hljs-function"><span class="hljs-keyword">public</span> T <span class="hljs-title">SomeMethod</span>&lt;<span class="hljs-title">T</span>&gt;(<span class="hljs-params"><span class="hljs-keyword">int</span> someNumber, <span class="hljs-keyword">bool</span> isValid</span>)</span>
+{
+}
+</div></code></pre>
+<h3 id="additional-naming-conventions">Additional naming conventions</h3>
+<ul>
+<li>Examples that don't include  <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/using-directive">using directives</a>, use namespace qualifications. If you know that a namespace is imported by default in a project, you don't have to fully qualify the names from that namespace. Qualified names can be broken after a dot (.) if they are too long for a single line, as shown in the following example.</li>
+</ul>
+<pre><code class="language-C#"><div><span class="hljs-keyword">var</span> currentPerformanceCounterCategory = <span class="hljs-keyword">new</span> System.Diagnostics.
+       PerformanceCounterCategory();
+</div></code></pre>
+<ul>
+<li>You don't have to change the names of objects that were created by using the Visual Studio designer tools to make them fit other guidelines.</li>
+</ul>
+<h2 id="layout-conventions">Layout conventions</h2>
+<p>Good layout uses formatting to emphasize the structure of your code and to make the code easier to read. Microsoft examples and samples conform to the following conventions:</p>
+<ul>
+<li>
+<p>Use the default Code Editor settings (smart indenting, four-character indents, tabs saved as spaces).</p>
+</li>
+<li></li>
+<li>
+<p>Write only one statement per line.</p>
+</li>
+<li>
+<p>Write only one declaration per line.</p>
+</li>
+<li>
+<p>If continuation lines are not indented automatically, indent them one tab stop (four spaces).</p>
+</li>
+<li>
+<p>Add at least one blank line between method definitions and property definitions.</p>
+</li>
+<li>
+<p>Use parentheses to make clauses in an expression apparent, as shown in the following code.</p>
+<pre><code class="language-C#"><div><span class="hljs-keyword">if</span> ((val1 &gt; val2) &amp;&amp; (val1 &gt; val3))
+{
+    <span class="hljs-comment">// Take appropriate action.</span>
+}
+</div></code></pre>
+</li>
+</ul>
+<h3 id="implicitly-typed-local-variables">Implicitly typed local variables</h3>
+<ul>
+<li>
+<p>Use  <a href="https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/implicitly-typed-local-variables">implicit typing</a>  for local variables when the type of the variable is obvious from the right side of the assignment, or when the precise type is not important.</p>
+<pre><code class="language-C#"><div><span class="hljs-keyword">var</span> var1 = <span class="hljs-string">&quot;This is clearly a string.&quot;</span>;
+<span class="hljs-keyword">var</span> var2 = <span class="hljs-number">27</span>;
+
+</div></code></pre>
+</li>
+<li>
+<p>Don't use  <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/var">var</a>  when the type is not apparent from the right side of the assignment. Don't assume the type is clear from a method name. A variable type is considered clear if it's a  <code>new</code>  operator or an explicit cast.</p>
+<pre><code class="language-C#"><div><span class="hljs-keyword">int</span> var3 = Convert.ToInt32(Console.ReadLine()); 
+<span class="hljs-keyword">int</span> var4 = ExampleClass.ResultSoFar();
+</div></code></pre>
+</li>
+<li>
+<p>Don't rely on the variable name to specify the type of the variable. It might not be correct. In the following example, the variable name  <code>inputInt</code>  is misleading. It's a string.</p>
+<pre><code class="language-C#"><div><span class="hljs-keyword">var</span> inputInt = Console.ReadLine();
+Console.WriteLine(inputInt);
+</div></code></pre>
+</li>
+<li>
+<p>Avoid the use of  <code>var</code>  in place of  <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/reference-types">dynamic</a>. Use  <code>dynamic</code>  when you want run-time type inference.</p>
+</li>
+<li>
+<p>Use implicit typing to determine the type of the loop variable in  <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/statements/iteration-statements#the-for-statement"><code>for</code></a>  loops.</p>
+<p>The following example uses implicit typing in a  <code>for</code>  statement.</p>
+<pre><code class="language-C#"><div><span class="hljs-keyword">var</span> phrase = <span class="hljs-string">&quot;lalalalalalalalalalalalalalalalalalalalalalalalalalalalalala&quot;</span>;
+<span class="hljs-keyword">var</span> manyPhrases = <span class="hljs-keyword">new</span> StringBuilder();
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">10000</span>; i++)
+{
+    manyPhrases.Append(phrase);
+}
+<span class="hljs-comment">//Console.WriteLine(&quot;tra&quot; + manyPhrases);</span>
+
+</div></code></pre>
+</li>
+<li>
+<p>Don't use implicit typing to determine the type of the loop variable in  <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/statements/iteration-statements#the-foreach-statement"><code>foreach</code></a>  loops.</p>
+<p>The following example uses explicit typing in a  <code>foreach</code>  statement.</p>
+<pre><code class="language-C#"><div><span class="hljs-keyword">foreach</span> (<span class="hljs-keyword">char</span> ch <span class="hljs-keyword">in</span> laugh)
+{
+    <span class="hljs-keyword">if</span> (ch == <span class="hljs-string">&#x27;h&#x27;</span>)
+        Console.Write(<span class="hljs-string">&quot;H&quot;</span>);
+    <span class="hljs-keyword">else</span>
+        Console.Write(ch);
+}
+Console.WriteLine();
+
+</div></code></pre>
+</li>
+</ul>
+<h3 id="unsigned-data-types">Unsigned data types</h3>
+<p>In general, use  <code>int</code>  rather than unsigned types. The use of  <code>int</code>  is common throughout C#, and it is easier to interact with other libraries when you use  <code>int</code>.</p>
+<h3 id="arrays">Arrays</h3>
+<p>Use the concise syntax when you initialize arrays on the declaration line. In the following example, note that you can't use  <code>var</code>  instead of  <code>string[]</code>.</p>
+<pre><code class="language-C#"><div><span class="hljs-keyword">string</span>[] vowels1 = { <span class="hljs-string">&quot;a&quot;</span>, <span class="hljs-string">&quot;e&quot;</span>, <span class="hljs-string">&quot;i&quot;</span>, <span class="hljs-string">&quot;o&quot;</span>, <span class="hljs-string">&quot;u&quot;</span> };
+</div></code></pre>
+<p>If you use explicit instantiation, you can use  <code>var</code>.</p>
+<pre><code class="language-C#"><div><span class="hljs-keyword">var</span> vowels2 = <span class="hljs-keyword">new</span> <span class="hljs-keyword">string</span>[] { <span class="hljs-string">&quot;a&quot;</span>, <span class="hljs-string">&quot;e&quot;</span>, <span class="hljs-string">&quot;i&quot;</span>, <span class="hljs-string">&quot;o&quot;</span>, <span class="hljs-string">&quot;u&quot;</span> };
+</div></code></pre>
+<p>If you specify an array size, you have to initialize the elements one at a time.</p>
+<pre><code class="language-C#"><div><span class="hljs-keyword">var</span> vowels3 = <span class="hljs-keyword">new</span> <span class="hljs-keyword">string</span>[<span class="hljs-number">5</span>];
+vowels3[<span class="hljs-number">0</span>] = <span class="hljs-string">&quot;a&quot;</span>;
+vowels3[<span class="hljs-number">1</span>] = <span class="hljs-string">&quot;e&quot;</span>;
+<span class="hljs-comment">// And so on.</span>
+</div></code></pre>
+<h3 id="try-catch--and--using--statements-in-exception-handling"><code>try</code>-<code>catch</code>  and  <code>using</code>  statements in exception handling</h3>
+<ul>
+<li>
+<p>Use a  <code>try-catch</code>  statement for most exception handling.</p>
+<pre><code class="language-C#"><div><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">string</span> <span class="hljs-title">GetValueFromArray</span>(<span class="hljs-params"><span class="hljs-keyword">string</span>[] array, <span class="hljs-keyword">int</span> index</span>)</span>
+{
+    <span class="hljs-keyword">try</span>
+    {
+        <span class="hljs-keyword">return</span> array[index];
+    }
+    <span class="hljs-keyword">catch</span> (System.IndexOutOfRangeException ex)
+    {
+        Console.WriteLine(<span class="hljs-string">&quot;Index is out of range: {0}&quot;</span>, index);
+        <span class="hljs-keyword">throw</span>;
+    }
+}
+</div></code></pre>
+</li>
+<li>
+<p>Simplify your code by using the C# <code>using</code> statement. If you have a  try-finally  statement in which the only code in the  <code>finally</code>  block is a call to the  Dispose.  method, use a  <code>using</code>  statement instead.</p>
+<p>In the following example, the  <code>try</code>-<code>finally</code>  statement only calls  <code>Dispose</code>  in the  <code>finally</code>  block.</p>
+<pre><code class="language-C#"><div>Font font1 = <span class="hljs-keyword">new</span> Font(<span class="hljs-string">&quot;Arial&quot;</span>, <span class="hljs-number">10.0f</span>);
+<span class="hljs-keyword">try</span>
+{
+    <span class="hljs-keyword">byte</span> charset = font1.GdiCharSet;
+}
+<span class="hljs-keyword">finally</span>
+{
+    <span class="hljs-keyword">if</span> (font1 != <span class="hljs-literal">null</span>)
+    {
+        ((IDisposable)font1).Dispose();
+    }
+}
+</div></code></pre>
+<p>You can do the same thing with a  <code>using</code>  statement.</p>
+<pre><code class="language-C#"><div><span class="hljs-keyword">using</span> (Font font2 = <span class="hljs-keyword">new</span> Font(<span class="hljs-string">&quot;Arial&quot;</span>, <span class="hljs-number">10.0f</span>))
+{
+    <span class="hljs-keyword">byte</span> charset2 = font2.GdiCharSet;
+}
+</div></code></pre>
+<p>In C# 8 and later versions, use the new  <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/using-statement"><code>using</code>  syntax</a>  that doesn't require braces:</p>
+<pre><code class="language-C#"><div><span class="hljs-keyword">using</span> Font font3 = <span class="hljs-keyword">new</span> Font(<span class="hljs-string">&quot;Arial&quot;</span>, <span class="hljs-number">10.0f</span>);
+<span class="hljs-keyword">byte</span> charset3 = font3.GdiCharSet;
+</div></code></pre>
+</li>
+</ul>
+<h3 id="new--operator"><code>new</code>  operator</h3>
+<ul>
+<li>
+<p>Use one of the concise forms of object instantiation, as shown in the following declarations. The second example shows syntax that is available starting in C# 9.</p>
+<pre><code class="language-C#"><div><span class="hljs-keyword">var</span> instance1 = <span class="hljs-keyword">new</span> ExampleClass();
+</div></code></pre>
+<pre><code class="language-C#"><div>ExampleClass instance2 = <span class="hljs-keyword">new</span>();
+</div></code></pre>
+<p>The preceding declarations are equivalent to the following declaration.</p>
+<pre><code class="language-C#"><div>ExampleClass instance2 = <span class="hljs-keyword">new</span> ExampleClass();
+</div></code></pre>
+</li>
+<li>
+<p>Use object initializers to simplify object creation, as shown in the following example.</p>
+<pre><code class="language-C#"><div><span class="hljs-keyword">var</span> instance3 = <span class="hljs-keyword">new</span> ExampleClass { Name = <span class="hljs-string">&quot;Desktop&quot;</span>, ID = <span class="hljs-number">37414</span>,
+    Location = <span class="hljs-string">&quot;Redmond&quot;</span>, Age = <span class="hljs-number">2.3</span> };
+</div></code></pre>
+<p>The following example sets the same properties as the preceding example but doesn't use initializers.</p>
+<pre><code class="language-C#"><div><span class="hljs-keyword">var</span> instance4 = <span class="hljs-keyword">new</span> ExampleClass();
+instance4.Name = <span class="hljs-string">&quot;Desktop&quot;</span>;
+instance4.ID = <span class="hljs-number">37414</span>;
+instance4.Location = <span class="hljs-string">&quot;Redmond&quot;</span>;
+instance4.Age = <span class="hljs-number">2.3</span>;
+</div></code></pre>
+</li>
+</ul>
+<h3 id="static-members">Static members</h3>
+<p>Call  <code>static</code>  members by using the class name:  <em>ClassName.StaticMember</em>. This practice makes code more readable by making static access clear. Don't qualify a static member defined in a base class with the name of a derived class. While that code compiles, the code readability is misleading, and the code may break in the future if you add a static member with the same name to the derived class.</p>
+<h3 id="linq-queries">LINQ queries</h3>
+<ul>
+<li>
+<p>Use meaningful names for query variables. The following example uses  <code>seattleCustomers</code>  for customers who are located in Seattle.</p>
+<pre><code class="language-C#"><div><span class="hljs-keyword">var</span> seattleCustomers = <span class="hljs-keyword">from</span> customer <span class="hljs-keyword">in</span> customers
+                           <span class="hljs-keyword">where</span> customer.City == <span class="hljs-string">&quot;Seattle&quot;</span>
+                           <span class="hljs-keyword">select</span> customer.Name;
+</div></code></pre>
+</li>
+<li>
+<p>Use aliases to make sure that property names of anonymous types are correctly capitalized, using Pascal casing.</p>
+<pre><code class="language-C#"><div><span class="hljs-keyword">var</span> localDistributors =
+    <span class="hljs-keyword">from</span> customer <span class="hljs-keyword">in</span> customers
+    <span class="hljs-keyword">join</span> distributor <span class="hljs-keyword">in</span> distributors <span class="hljs-keyword">on</span> customer.City <span class="hljs-keyword">equals</span> distributor.City
+    <span class="hljs-keyword">select</span> <span class="hljs-keyword">new</span> { Customer = customer, Distributor = distributor };
+</div></code></pre>
+</li>
+<li>
+<p>Rename properties when the property names in the result would be ambiguous. For example, if your query returns a customer name and a distributor ID, instead of leaving them as  <code>Name</code>  and  <code>ID</code>  in the result, rename them to clarify that  <code>Name</code>  is the name of a customer, and  <code>ID</code>  is the ID of a distributor.</p>
+<pre><code class="language-C#"><div><span class="hljs-keyword">var</span> localDistributors2 =
+    <span class="hljs-keyword">from</span> customer <span class="hljs-keyword">in</span> customers
+    <span class="hljs-keyword">join</span> distributor <span class="hljs-keyword">in</span> distributors <span class="hljs-keyword">on</span> customer.City <span class="hljs-keyword">equals</span> distributor.City
+    <span class="hljs-keyword">select</span> <span class="hljs-keyword">new</span> { CustomerName = customer.Name, DistributorID = distributor.ID };
+</div></code></pre>
+</li>
+<li>
+<p>Use implicit typing in the declaration of query variables and range variables.</p>
+<pre><code class="language-C#"><div><span class="hljs-keyword">var</span> seattleCustomers = <span class="hljs-keyword">from</span> customer <span class="hljs-keyword">in</span> customers
+                       <span class="hljs-keyword">where</span> customer.City == <span class="hljs-string">&quot;Seattle&quot;</span>
+                       <span class="hljs-keyword">select</span> customer.Name;
+</div></code></pre>
+</li>
+<li>
+<p>Align query clauses under the  <code>from</code>  clause, as shown in the previous examples.</p>
+</li>
+<li>
+<p>Use  <code>where</code>  clauses before other query clauses to ensure that later query clauses operate on the reduced, filtered set of data.</p>
+<pre><code class="language-C#"><div><span class="hljs-keyword">var</span> seattleCustomers2 = <span class="hljs-keyword">from</span> customer <span class="hljs-keyword">in</span> customers
+                        <span class="hljs-keyword">where</span> customer.City == <span class="hljs-string">&quot;Seattle&quot;</span>
+                        <span class="hljs-keyword">orderby</span> customer.Name
+                        <span class="hljs-keyword">select</span> customer;
+</div></code></pre>
+</li>
+<li>
+<p>Use multiple  <code>from</code>  clauses instead of a  <code>join</code>.  clause to access inner collections. For example, a collection of  <code>Student</code>  objects might each contain a collection of test scores. When the following query is executed, it returns each score that is over 90, along with the last name of the student who received the score.</p>
+<pre><code class="language-C#"><div><span class="hljs-keyword">var</span> scoreQuery = <span class="hljs-keyword">from</span> student <span class="hljs-keyword">in</span> students
+                 <span class="hljs-keyword">from</span> score <span class="hljs-keyword">in</span> student.Scores
+                 <span class="hljs-keyword">where</span> score &gt; <span class="hljs-number">90</span>
+                 <span class="hljs-keyword">select</span> <span class="hljs-keyword">new</span> { Last = student.LastName, score };
+</div></code></pre>
+</li>
+</ul>
+<h2 id="the-general-rule-to-follow-use-visual-studio-defaults">The general rule to follow &quot;use Visual Studio defaults&quot;</h2>
+<ol>
+<li>Each brace begins on a new line. A single line statement block can go without braces but the block must be properly indented on its own line and must not be nested in other statement blocks that use braces. One exception is that a  <code>using</code>  statement is permitted to be nested within another  <code>using</code>  statement by starting on the following line at the same indentation level, even if the nested  <code>using</code>  contains a controlled block.</li>
+<li>We use  <code>_camelCase</code>  for internal and private fields and use  <code>readonly</code>  where possible. Prefix internal and private instance fields with  <code>_</code>, static fields with  <code>s_</code>  and thread static fields with  <code>t_</code>. When used on static fields,  <code>readonly</code>  should come after  <code>static</code>  (e.g.  <code>static readonly</code>  not  <code>readonly static</code>). Public fields should be used sparingly and should use PascalCasing with no prefix when used.</li>
+<li>We avoid  <code>this.</code>  unless absolutely necessary.</li>
+<li>We always specify the visibility, even if it's the default (e.g.  <code>private string _foo</code>  not  <code>string _foo</code>). Visibility should be the first modifier (e.g.  <code>public abstract</code>  not  <code>abstract public</code>).</li>
+<li>Namespace imports should be specified at the top of the file,  <em>outside</em>  of  <code>namespace</code>  declarations, and should be sorted alphabetically, with the exception of  <code>System.*</code>  namespaces, which are to be placed on top of all others.</li>
+<li>Avoid more than one empty line at any time. For example, do not have two blank lines between members of a type.</li>
+<li>Avoid spurious free spaces. For example avoid  <code>if (someVar == 0)...</code>, where the dots mark the spurious free spaces. Consider enabling &quot;View White Space (Ctrl+R, Ctrl+W)&quot; or &quot;Edit -&gt; Advanced -&gt; View White Space&quot; if using Visual Studio to aid detection.</li>
+<li>If a file happens to differ in style from these guidelines (e.g. private members are named  <code>m_member</code>  rather than  <code>_member</code>), the existing style in that file takes precedence.</li>
+<li>We only use  <code>var</code>  when the type is explicitly named on the right-hand side, typically due to either  <code>new</code>  or an explicit cast, e.g.  <code>var stream = new FileStream(...)</code>  not  <code>var stream = OpenStandardInput()</code>.</li>
+<li>We use language keywords instead of BCL types (e.g.  <code>int, string, float</code>  instead of  <code>Int32, String, Single</code>, etc) for both type references as well as method calls (e.g.  <code>int.Parse</code>  instead of  <code>Int32.Parse</code>).</li>
+<li>We use PascalCasing to name all our constant local variables and fields. The only exception is for interop code where the constant value should exactly match the name and value of the code you are calling via interop.</li>
+<li>We use PascalCasing for all method names, including local functions.</li>
+<li>We use  <code>nameof(...)</code>  instead of  <code>&quot;...&quot;</code>  whenever possible and relevant.</li>
+<li>Fields should be specified at the top within type declarations.</li>
+<li>When including non-ASCII characters in the source code use Unicode escape sequences (\uXXXX) instead of literal characters. Literal non-ASCII characters occasionally get garbled by a tool or editor.</li>
+<li>When using labels (for goto), indent the label one less than the current indentation.</li>
+<li>When using a single-statement if, we follow these conventions:
+<ul>
+<li>Never use single-line form (for example:  <code>if (source == null) throw new ArgumentNullException(&quot;source&quot;);</code>)</li>
+<li>Using braces is always accepted, and required if any block of an  <code>if</code>/<code>else if</code>/.../<code>else</code>  compound statement uses braces or if a single statement body spans multiple lines.</li>
+<li>Braces may be omitted only if the body of  <em>every</em>  block associated with an  <code>if</code>/<code>else if</code>/.../<code>else</code>  compound statement is placed on a single line.</li>
+</ul>
+</li>
+<li>Make all internal and private types static or sealed unless derivation from them is required. As with any implementation detail, they can be changed if/when derivation is required in the future.</li>
+</ol>
+
+    </body>
+    </html>

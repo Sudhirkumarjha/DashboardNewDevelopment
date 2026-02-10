@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup Label="Globals">
+    <SccProjectName>SAK</SccProjectName>
+    <SccProvider>SAK</SccProvider>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccLocalPath>SAK</SccLocalPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Models\BulkJERPass.cs" />
+    <Compile Remove="Models\CertificateDetails.cs" />
+    <Compile Remove="Models\CourseLaunch.cs" />
+    <Compile Remove="Models\CourseNotification.cs" />
+    <Compile Remove="Models\CourseNotificationDetail.cs" />
+    <Compile Remove="Models\CourseTrackingMaster.cs" />
+    <Compile Remove="Models\EventDetails.cs" />
+    <Compile Remove="Models\EventRegistration.cs" />
+    <Compile Remove="Models\EventTypeMaster.cs" />
+    <Compile Remove="Models\LearningPlan.cs" />
+    <Compile Remove="Models\NotifyMe.cs" />
+    <Compile Remove="Models\Program.cs" />
+    <Compile Remove="Models\Programs.cs" />
+    <Compile Remove="Models\UpComingCourse.cs" />
+    <Compile Remove="Models\UpComingCourseExtraData.cs" />
+    <Compile Remove="Models\WhatYouWillLearn.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.32" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="3.1.32" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.32">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.32">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>

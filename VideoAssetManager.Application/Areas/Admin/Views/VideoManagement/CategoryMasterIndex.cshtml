@@ -1,0 +1,334 @@
+@model IEnumerable<VM_CategoryMaster>
+
+@{
+    Random random = new Random();
+    int categoryListpageid = random.Next();
+
+    ViewData["suggestionfor"] = "Category";
+
+    ViewData["AspAction"] = "CreateCategory";
+    ViewData["AspController"] = "VideoManagement";
+    ViewData["Title"] = "Manage Category";
+    ViewData["ButtonText"] = "Add Category";
+}
+<link href="~/JqGrid/css/jqGridPage-ui.css" rel="stylesheet" />
+
+
+<partial name="_FormCaptionAndButton" view-data="ViewData" />
+
+@section Scripts
+{
+    <script src="~/lib/jquery/dist/js/jquery-ui.min.js"></script>
+    <script src="~/lib/jquery/dist/js/trirand/i18n/grid.locale-en.js"></script>
+    <script src="~/lib/jquery/dist/js/trirand/jquery.jqgrid.min.js"></script>
+    <script src="~/autocomplete/ui-1.1.2.1.min.js"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+         $("#clsCaption").html("Manage Category");
+            $("#SearchString").attr("placeholder", "Search for Category Name");
+            var selectedRows = [];
+            var AllRows = [];
+
+
+            $("#jqGrid").jqGrid({
+                url: '/admin/VideoManagement/CategoryDetails',
+                mtype: "GET",
+                datatype: "json",
+                contentType: "application/json",
+                postData: { TopSearch: function () { return $('#SearchString').val(); }, Contentlistpageid: @categoryListpageid },
+                colModel: [
+                    { label: 'Id', name: 'id', width: 100, align: "center", key: true, editable: true, hidden: true },
+                    { label: 'Category Name', name: 'name', width: 1000, align: "left", editoptions: { value: "" }, editable: true, hidden: false, searchoptions: { sopt: ["cn", "nc", "eq", "ne", "nu", "nn"] }, coloptions: { filtering: false, seraching: false, freeze: false } },
+                    { label: 'Display Order', name: 'displayOrder', width: 250, align: "center", editoptions: { value: "" }, editable: true, hidden: false, searchoptions: { sopt: ["gt", "lt", "ge", "le", "eq", "ne"] }, coloptions: { filtering: false, seraching: false, freeze: false } },
+                    {
+                        label: 'Created On', name: 'createdOn', width: 250, editable: false, hidden: false, align: "center",edittype: "label", formatter: 'date', formatoptions: { newformat: 'd-M-y' }, sorttype: "date", coloptions: { filtering: false, seraching: false, freeze: false, hidden: true },
+                        searchoptions: {
+                            sopt: ["gt", "lt", "ge", "le", "eq", "ne"],
+                            dataInit: function (elem) {
+                                $(elem).datepicker({
+                                    dateFormat: 'd-M-y',
+                                    changeYear: true,
+                                    changeMonth: true,
+                                    onSelect: function (dateText, inst) {
+                                        setTimeout(function () {
+                                            $('#jqGrid')[0].triggerToolbar();
+                                        }, 100);
+                                    }
+                                });
+                            },
+                        },
+                        editoptions: {
+                            readonly: "readonly",
+                            sopt: ["gt", "lt", "ge", "le", "eq", "ne"],
+                            dataInit: function (elem) {
+                                $(elem).datepicker({
+                                    dateFormat: 'd-M-y',
+                                    changeYear: true,
+                                    changeMonth: true,
+                                    defaultDate: new Date(),
+                                    minDate: new Date(),
+
+                                });
+                            },
+                        },
+                    },
+                    {
+                        label: 'Modified On', name: 'modifyOn', width: 250, editable: false, hidden: false, align: "center", edittype: "label", formatter: 'date', formatoptions: { newformat: 'd-M-y' }, sorttype: "date", coloptions: { filtering: false, seraching: false, freeze: false, hidden: true },
+                        searchoptions: {
+                            sopt: ["gt", "lt", "ge", "le", "eq", "ne"],
+                            dataInit: function (elem) {
+                                $(elem).datepicker({
+                                    dateFormat: 'd-M-y',
+                                    changeYear: true,
+                                    changeMonth: true,
+                                    onSelect: function (dateText, inst) {
+                                        setTimeout(function () {
+                                            $('#jqGrid')[0].triggerToolbar();
+                                        }, 100);
+                                    }
+                                });
+                            },
+                        },
+                        editoptions: {
+                            readonly: "readonly",
+                            dataInit: function (elem) {
+                                $(elem).datepicker({
+                                    dateFormat: 'd-M-y',
+                                    changeYear: true,
+                                    changeMonth: true,
+                                    defaultDate: new Date(),
+                                    minDate: new Date(),
+
+                                });
+                            },
+                        }
+                    },
+                    { label: 'Status', name: 'Active', formatter: IsActive, width: 250, align: "center", editable: true, stype: "select", searchoptions: { value: ":[All];true:Active;false:Inactive" }, coloptions: { filtering: false, seraching: false, freeze: false }, edittype: "custom", editoptions: { custom_element: myelemactive, custom_value: myvalueactive } },
+                    { label: 'Action', name: 'Edit', width: 70, align: "center", formatter: "actions", width: 250, formatoptions: { keys: true, onEdit: onEdit, del: true, afterRestore: reloadGrid, onSuccess: reloadGrid }, title: false, sortable: false, search: false, colmenu: false, hidden: false, editable: false },
+                ],
+
+                viewrecords: true,
+                height: 'auto',
+                rowNum: 25,
+                rowList: [25, 50, 75, 100],
+                multiselect: false,
+                sortorder: "asc",
+                sortname: "id",
+                pager: "#jqGridPager",
+                gridview: true,
+                autoencode: true,
+                sortable: true,
+                colMenu: true,
+                subGrid: false,
+                autowidth: false,
+                multiselectPosition: "none",
+                //del: true,
+                //loadonce: true,
+                emptyrecords: 'No records to display',
+
+
+                autowidth: true,
+                editurl: '/admin/VideoManagement/DeleteCategory',
+                onSelectRow: function (rowId, status, e) {
+                    if (status === false) {
+                        var index = selectedRows.indexOf(rowId);
+                        while (index > -1) {
+                            selectedRows.splice(index, 1);
+                            index = selectedRows.indexOf(rowId);
+                        }
+                    } else {
+                        var index = selectedRows.indexOf(rowId);
+                        if (index == -1) {
+                            selectedRows.push(rowId);
+                        }
+                    }
+                    $('#hdnSelectedRows').val(selectedRows.join(","));
+                },
+
+                onSelectRow: function (rowId, status, e) {
+                    if (status === false) {
+                        var index = selectedRows.indexOf(rowId);
+                        while (index > -1) {
+                            selectedRows.splice(index, 1);
+                            index = selectedRows.indexOf(rowId);
+                        }
+                        $('#hdnAllRows').val(false);
+                    } else {
+                        var index = selectedRows.indexOf(rowId);
+                        if (index == -1) {
+                            selectedRows.push(rowId);
+                        }
+                    }
+                    $('#hdnSelectedRows').val(selectedRows.join(","));
+                },
+                onSelectAll: function (rowIds, status) {
+                    if (status === true) {
+                        var PageIds = $('#jqGrid').jqGrid('getDataIDs');
+                        $.each(PageIds, function (i) {
+                            var index = selectedRows.indexOf(PageIds[i]);
+                            if (index == -1) {
+                                selectedRows.push(PageIds[i]);
+                            }
+                        });
+                    } else {
+                        var PageIds = $('#jqGrid').jqGrid('getDataIDs');
+                        $.each(PageIds, function (i) {
+                            var index = selectedRows.indexOf(PageIds[i]);
+                            while (index > -1) {
+                                selectedRows.splice(index, 1);
+                                index = selectedRows.indexOf(PageIds[i]);
+                            }
+                        });
+                        $('#hdnAllRows').val(false);
+                    }
+                    $('#hdnSelectedRows').val(selectedRows.join(","));
+                },
+                gridComplete: function () {
+                    var $self = $(this), rows = this.rows, i, iAction, tr,
+                        colModel = $self.jqGrid("getGridParam", "colModel"),
+                        idPrefix = $self.jqGrid("getGridParam", "idPrefix"),
+                        newOnClick = function (e) {
+                            var rowid = $(this).closest(".jqgrow").attr("id");
+                            e.stopPropagation();
+                            window.location.href = "CreateCategory?Id=" + rowid;
+                        };
+
+                    // find the index of the column with formatter: "actions"
+                    for (i = 0; i < colModel.length; i++) {
+                        if (colModel[i].formatter === "actions") {
+                            iAction = i;
+                            break;
+                        }
+                    }
+                    if (iAction === undefined) {
+                        return;
+                    }
+                    for (i = 0; i < rows.length; i++) {
+                        tr = rows[i];
+                        if ($(tr).hasClass("jqgrow")) {
+                            $(tr.cells[iAction]).find(".ui-inline-edit")
+                                .click(newOnClick)      // register new click event handler
+                                .prop("onclick", null); // remove standard behavior of Edit button
+                        }
+                    }
+                    $("#delmodjqGrid").attr("style:z-index: 950; top: 186px; left: 890px;");
+                }
+            });
+
+            $('#jqGrid').jqGrid('filterToolbar', { stringResult: true, searchOperators: true });
+
+            if ($(window).width() >= 1600) {
+                $("#jqGrid").setGridWidth(Math.round($("#table-responsive").width() - 2, true));
+            }
+            else {
+                $("#jqGrid").setGridWidth(Math.round($("#table-responsive .inner_width").width(), true));
+            }
+            //$("#gs_jqGrid_contentType").hide();
+            //$("#gs_jqGrid_contentType").closest('clearsearchclass').hide();
+        });
+
+
+        function reloadGrid(cellValue, options, rowdata, action) {
+            $('#jqGrid').trigger('reloadGrid');
+        }
+        $(window).resize(function () {
+            setTimeout(function () {
+                if ($(window).width() >= 1600) {
+                    $("#jqGrid").setGridWidth(Math.round($("#table-responsive").width() - 2, true));
+                }
+                else {
+                    $("#jqGrid").setGridWidth(Math.round($("#table-responsive .inner_width").width(), true));
+                }
+            }, 500);
+        });
+
+        $('.sidebar-toggle').click(function () {
+            setTimeout(function () {
+                if ($(window).width() >= 1200) {
+                    $("#jqGrid").setGridWidth(Math.round($("#table-responsive").width() - 2, true));
+                }
+                else {
+                    $("#jqGrid").setGridWidth(Math.round($("#table-responsive .inner_width").width(), true));
+                }
+            }, 500);
+        });
+        function onEdit(cellValue) {
+
+
+
+        }
+        $('#SearchString').bind("enterKey", function (e) {
+            $('#jqGrid').trigger('reloadGrid');
+        });
+        $('#SearchString').keyup(function (e) {
+            if (e.keyCode == 13) {
+                $(this).trigger("enterKey");
+                $('#jqGrid').trigger('reloadGrid');
+            }
+        });
+        function myelemactive(value, options) {
+            var el = document.createElement("select");
+            el.className = "editable inline-edit-cell ui-widget-content ui-corner-all";
+            el.style = "width: 100%;";
+            var selected = value.includes("JQcheck", 0);
+            if (selected) {
+                el.options.add(new Option("Active", "true", true, true));
+                el.options.add(new Option("Inactive", "false"));
+            }
+            else {
+                el.options.add(new Option("Active", "true"));
+                el.options.add(new Option("Inactive", "false", true, true));
+            }
+            return el;
+        }
+        function myvalueactive(elem, operation, value) {
+            if (operation === 'get') {
+                return $(elem).val();
+            } else if (operation === 'set') {
+                $('select', elem).val(value);
+            }
+        }
+
+        function IsActive(cellValue, options, rowdata, action) {
+            if (rowdata.active == true)
+                return "<img style='cursor:pointer; width:25px;' title='Click to Deactivate' onclick='ChangeCategoryStatus(" + rowdata.id + ")' src=@ViewData["appurl"]JqGrid/css/images/JQcheck.png><img>";
+            else
+                return "<img style='cursor:pointer; width:25px;' title='Click to Activate' onclick='ChangeCategoryStatus(" + rowdata.id + ")' src=@ViewData["appurl"]JqGrid/css/Images/JQclose.PNG><img>";
+        }
+
+        function ChangeCategoryStatus(id) {
+            if (confirm('Are you sure to continue?')) {
+                $.ajax({
+                    url: '/admin/VideoManagement/ChangeCategoryStatus',
+                    type: "GET",
+                    data: { Id: id },
+                    crossDomain: true,
+                    contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                    dataType: "json",
+                    headers: {},
+                    crossDomain: true,
+                    charset: "UTF-8",
+                    cache: false,
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    error: function () {
+                        console.log('error');
+                    },
+                    success: function (data) {
+                        if (data.status == 1) {
+                            $('#jqGrid').trigger('reloadGrid');
+                            //alert('The status of the selected record has been successfully changed.')
+                        }
+                        else {
+                            alert(data.Error);
+                            $('#jqGrid').trigger('reloadGrid');
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+}

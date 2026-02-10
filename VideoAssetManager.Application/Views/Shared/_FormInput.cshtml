@@ -1,0 +1,76 @@
+﻿
+@model Tuple<string, string, string, bool, string, string>
+
+<div class="form-group">
+
+    @if (Model.Item5 == "checkbox")
+    {
+        
+        <input type="checkbox"
+               class="checkbox-large"
+               name="@Model.Item2"
+               id="@Model.Item2"
+               value="true"
+               @(bool.TryParse(Model.Item2, out bool isChecked) && isChecked ? "checked" : "") />
+        <b>
+            <label for="@Model.Item2" class=@(Model.Item4 ? "required" : "none")>@Model.Item1</label>
+        </b>
+    }
+
+    else
+    {
+<b>
+    <label for="@Model.Item2" class=@(Model.Item4 ? "required" : "none")>@Model.Item1</label>
+</b>
+        <div class="input-group">
+            @if (Model.Item5 == "date")
+            {
+                <input type="date"
+                       class="form-control"
+                       name="@Model.Item2"
+                       id="@Model.Item2"
+                       value="@Model.Item3"
+                       data-val="true"
+                       data-val-required="This field is required."
+                       required />
+            }
+            else if (Model.Item5 == "number")
+            {
+                <input type="number"
+                       class="form-control"
+                       name="@Model.Item2"
+                       id="@Model.Item2"
+                       value="@Model.Item3"
+                       min="1"
+                       data-val="true"
+                       data-val-required="This field is required."
+                       data-val-range="The @Model.Item1 must be at least 1."
+                       data-val-range-min="1"
+                       data-val-range-max="@int.MaxValue"
+                       required />
+            }
+            else
+            {
+                <input type="text"
+                       class="form-control"
+                       name="@Model.Item2"
+                       id="@Model.Item2"
+                       value="@Model.Item3"
+                       placeholder="@(Model.Item2 == "Duration" ? "00:00" : "")"
+                       data-val="true"
+                       data-val-required="This field is required."
+                       required />
+            }
+            @if (!string.IsNullOrEmpty(Model.Item6))
+            {
+                <div class="input-group-append">
+                    <span class="input-group-text">@Model.Item6</span>
+                </div>
+            }
+        </div>
+        <span class="text-danger field-validation-valid"
+              style="display: block; white-space: normal; width: 100%; overflow: visible;"
+              data-valmsg-for="@Model.Item2"
+              data-valmsg-replace="true"></span>
+    }
+</div>

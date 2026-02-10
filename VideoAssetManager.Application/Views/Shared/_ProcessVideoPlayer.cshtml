@@ -1,0 +1,57 @@
+﻿
+<style>
+    .amp-default-skin .amp-logo > div, .amp-default-skin .amp-logo > span {
+        background-image: url(@ViewData["appurl"]assets/img/logo/rekhtaWorldlogo.png) !important;
+        background-position: right top;
+        background-repeat: no-repeat;
+        background-size: contain;
+        bottom: auto;
+        display: block;
+        height: 32px;
+        left: auto;
+        max-width: .18em;
+        position: static;
+        right: -webkit-calc(.03em);
+        right: calc(.03em);
+        top: -webkit-calc(.03em);
+        top: calc(.03em);
+        width: 100%
+    }
+
+</style>
+<link href="~/JqGrid/css/jqGridPage-ui.css" rel="stylesheet" />
+<link href="//amp.azure.net/libs/amp/latest/skins/amp-default/azuremediaplayer.min.css" rel="stylesheet">
+<script src="//amp.azure.net/libs/amp/latest/azuremediaplayer.min.js"></script>
+<script>
+    amp.options.flashSS.swf = "//amp.azure.net/libs/amp/latest/techs/StrobeMediaPlayback.2.0.swf"
+    amp.options.silverlightSS.xap = "//amp.azure.net/libs/amp/latest/techs/SmoothStreamingPlayer.xap"
+</script>
+<body>
+    <video id="vid1" class="azuremediaplayer amp-default-skin" controls width="1000" height="550" poster="" data-setup='{"techorder": ["azurehtml5js", "flashss", "html5fairplayhls","silverlightss", "html5"], "nativecontrolsfortouch": true}'>
+        <source src=@ViewData["url"] type="application/vnd.ms-sstr+xml" />
+        <p class="amp-no-js">
+            to view this video please enable javascript, and consider upgrading to a web browser that supports html5 video
+        </p>
+    </video>
+</body>
+<script type="text/javascript">
+
+    var myPlayer = amp(document.getElementById('vid1'), { /* Options */
+        techOrder: ["azureHtml5JS", "flashSS", "html5FairPlayHLS", "silverlightSS", "html5"],
+        "nativeControlsForTouch": false,
+        autoplay: false,
+        controls: true,
+        width: "300",
+        height: "400",
+        poster: ""
+    }, function () {
+        console.log('Good to go!');
+        // add an event listener
+
+        this.addEventListener('ended', function () {
+            console.log('Finished!');
+        });
+    }
+    );
+
+</script>

@@ -1,0 +1,52 @@
+﻿.ui-jqgrid .ui-pg-input, .ui-jqgrid .ui-jqgrid-toppager .ui-pg-input {
+    color: #000;
+}
+
+.ui-jqgrid .ui-pg-selbox, .ui-jqgrid .ui-jqgrid-toppager .ui-pg-selbox {
+    padding: 3px 8px !important;
+}
+
+.ui-datepicker {
+    z-index: 999 !important;
+}
+
+    .ui-datepicker select.ui-datepicker-month, .ui-datepicker select.ui-datepicker-year {
+        color: #2568CD;
+    }
+
+/*.ui-jqgrid .loading {
+        background: url('~/JqGrid/css/images/Ripple-1.8s-200px.gif') no-repeat 50% 50% !important;
+        height: 65px;
+        width: 65px;
+        border-width: 0px !important;
+        font-size: 0;
+    }*/
+
+@@media(max-width:1199px) {
+    #table-responsive .inner_width {
+        min-width: 1200px;
+    }
+}
+/*.ui-jqdialog {
+    width: 240px;
+    height: auto;
+    z-index: 950;
+    top: 304.5px;
+    left: 876px !important;
+    display: block;
+}*/
+.ui-jqdialog {
+    width: 240px;
+    height: auto;
+    z-index: 950;
+    top: 390px !important;
+    left: 876px !important;
+    display: block;
+
+}
+.ui-icon-gripsmall-diagonal-se {
+    display: none !important;
+}
+.ui-jqgrid tr.jqgrow td {
+    white-space: normal !important;
+}

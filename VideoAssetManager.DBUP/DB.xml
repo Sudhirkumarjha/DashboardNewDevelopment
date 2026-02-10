@@ -1,0 +1,52 @@
+<DB>
+<!--Scripts\Table-->
+<OBJECT>
+	<FILE>TABLES\AutomailerDeliveryDetails.sql</FILE>
+</OBJECT>
+<OBJECT>
+	<FILE>TABLES\AutomailerDetails.sql</FILE>
+</OBJECT>
+<OBJECT>
+	<FILE>TABLES\AutomailerMaster.sql</FILE>
+</OBJECT>
+<OBJECT>
+	<FILE>TABLES\AutomailerParameterMaster.sql</FILE>
+</OBJECT>
+<!--Scripts\DATA-->
+<OBJECT>
+	<FILE>DATA\QuickLinkMaster.SQL</FILE>
+</OBJECT>
+<OBJECT>
+	<FILE>DATA\TabMenu.SQL</FILE>
+</OBJECT>
+<OBJECT>
+	<FILE>DATA\AutomailerMaster.SQL</FILE>
+</OBJECT>
+<OBJECT>
+	<FILE>DATA\AutomailerParameterMaster.SQL</FILE>
+</OBJECT>
+
+<OBJECT>
+	<FILE>DATA\AutomailerDetails.SQL</FILE>
+</OBJECT>
+<!--Scripts\SPS-->
+<OBJECT>
+	<FILE>SPs\SP_GenrateInserts.SQL</FILE>
+</OBJECT>
+<OBJECT>
+	<FILE>SPs\SP_GetAdminUsers.SQL</FILE>
+</OBJECT>
+<OBJECT>
+	<FILE>SPs\SP_GetCourseDetails.SQL</FILE>
+</OBJECT>
+<OBJECT>
+	<FILE>SPs\SP_GetCourses.SQL</FILE>
+</OBJECT>
+<OBJECT>
+	<FILE>SPs\Sp_GetTabMenu.SQL</FILE>
+</OBJECT>
+<OBJECT>
+	<FILE>SPs\SP_GetUserDetails.SQL</FILE>
+</OBJECT>
+
+</DB>

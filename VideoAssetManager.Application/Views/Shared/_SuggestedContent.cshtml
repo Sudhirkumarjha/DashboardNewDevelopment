@@ -1,0 +1,91 @@
+﻿@{
+    string suggestionfor = "";
+    if (ViewData["suggestionfor"] != null)
+    {
+        suggestionfor = ViewData["suggestionfor"].ToString();
+    }
+}
+<style>
+    /* @@media(max-width: 425.219px) {
+        #ui-id-1 {
+            width: 425.719px !important;
+        }
+    }*/
+    .ui-autocomplete {
+        /* width: 517.234px !important;*/
+        max-height: 311px;
+        overflow-y: scroll !important;
+    }
+
+
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #888;
+    }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+    .scrollbar-thin {
+        background-color: lightgreen;
+        height: 150px;
+        width: 200px;
+        overflow-y: scroll;
+    }
+</style>
+
+<div class="box box-primary">
+    <div class="box-body">
+        <div class="row">
+            <div style="display: flex; justify-content: flex-end; flex-direction: row; align-items: center; margin-left: 0px;">
+                <input type="text" value="" name="ContentString" id="ContentString" class="form-control" placeholder="Search..." />
+                <input type="hidden" name="hdnContentSearchId" id="hdnContentSearchId" />
+            </div>
+            <br />
+            <span class="text-danger" id="validateContentList"></span>
+        </div>
+    </div>
+</div>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#ContentString")
+            .autocomplete({
+                source: function (request, response) {
+                    $.getJSON('@Url.Action("SuggestedContent", "Common")',
+                        { term: $("#ContentString").val(), Params: '@suggestionfor' },
+                        response
+                    );
+                },
+                minLength: 1,
+                select: function (event, ui) {
+                    $("#ContentString").val(ui.item.Name);
+                    if ($("#ContentString").val() != '') {
+                        $("#ContentString").val(ui.item.Name);
+                        $("#hdnContentSearchId").val(ui.item.ListId);
+                        return false;
+                    } else { return false; };
+                    $("#ContentString").val('');
+                    return false;
+                },
+            })
+            .data("ui-autocomplete")._renderItem = function (ul, item) {
+                return $("<li style='width: 452px !important;' class='dropdownOptions'></li>")
+                    .data("item.autocomplete", item)
+                    .append("<a href='javascript:void(0);' class='dropdown-contentoption' onclick='SelectContent(\"" + item.name + "\",\"" + item.listId +"\")'><span>" + item.name + "</span></a>")
+                    .appendTo(ul);
+
+            };
+    });
+
+</script>
